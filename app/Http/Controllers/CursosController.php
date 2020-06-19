@@ -13,49 +13,39 @@ class CursosController extends Controller
         $actual = null;
         $anterior = null;
 
-
         // Todas las filas de la base de datos
-        $fila = DB::select('select * from cursos limit 4');
+        $filas = DB::select('select * from cursos limit 4');
         
         // Diccionario donde se guardarán todos los cursos
         $cursos = [];
 
         // Guardamos todos los cursos en el diccionario
-        for($i = 0; $i < count($fila); $i++)
+        foreach($filas as $fila)
         {
+            // Reset variables
+            $lun1 = null;
+            $lun2 = null;
+            $mar1 = null;
+            $mar2 = null;
+            $mie1 = null;
+            $mie2 = null;
+            $jue1 = null;
+            $jue2 = null;
+            $vie1 = null;
+            $vie2 = null;
+            $sab1 = null;
+            $sab2 = null;
+            $dom1 = null;
+            $dom2 = null;
+
             // Guardando el NRC actual
-            $actual = $fila[$i]->Nrc;
-
-            if($actual != $anterior)
-            {
-                // Reset variables
-                $variables = [];
-                $lun1 = null;
-                $lun2 = null;
-                $mar1 = null;
-                $mar2 = null;
-                $mie1 = null;
-                $mie2 = null;
-                $jue1 = null;
-                $jue2 = null;
-                $vie1 = null;
-                $vie2 = null;
-                $sab1 = null;
-                $sab2 = null;
-                $dom1 = null;
-                $dom2 = null;
-            }
-
-            // Limpiando las horas semanales
-            $hrs_sem = $fila[$i]->Hrs_sem;
-            $hrs_sem_cadena = substr($hrs_sem, 0, 1);
-            $Hrs_sem = intval($hrs_sem_cadena);
+            $actual = $fila->Nrc;
 
             // Extrayendo las horas en que se ve cada curso
-            if($fila[$i]->Lunes)
+            if($fila->Lunes)
             {
                 // Recibo el texto de la celda que contiene el lapso de tiempo en que se da la clase
-                $texto = $fila[$i]->Lunes;
+                $texto = $fila->Lunes;
 
                 // Todas las horas tienen el mismo formato (HH:MM-HH:MM). Separamos con el guión.
                 // Tomamos los primero dos números de cada parte.
@@ -63,146 +53,105 @@ class CursosController extends Controller
                 $lun1 = substr($partes[0], 0, 2);
                 $lun2 = substr($partes[1], 0, 2);
 
-                // Se agrega a las variables
-                $variables[] = 'lunes';
             }
-            elseif($fila[$i]->Martes)
+            elseif($fila->Martes)
             {
                 // Recibo el texto de la celda que contiene el lapso de tiempo en que se da la clase
-                $texto = $fila[$i]->Martes;
+                $texto = $fila->Martes;
 
                 // Todas las horas tienen el mismo formato (HH:MM-HH:MM). Separamos con el guión.
                 // Tomamos los primero dos números de cada parte.
                 $partes = explode('-', $texto);
                 $mar1 = substr($partes[0], 0, 2);
                 $mar2 = substr($partes[1], 0, 2);
-
-                // Se agrega a las variables
-                $variables[] = 'martes';
             }
-            elseif($fila[$i]->Miercoles)
+            elseif($fila->Miercoles)
             {
                 // Recibo el texto de la celda que contiene el lapso de tiempo en que se da la clase
-                $texto = $fila[$i]->Miercoles;
+                $texto = $fila->Miercoles;
 
                 // Todas las horas tienen el mismo formato (HH:MM-HH:MM). Separamos con el guión.
                 // Tomamos los primero dos números de cada parte.
                 $partes = explode('-', $texto);
                 $mie1 = substr($partes[0], 0, 2);
                 $mie2 = substr($partes[1], 0, 2);
-
-                // Se agrega a las variables
-                $variables[] = 'miercoles';
             }
-            elseif($fila[$i]->Jueves)
+            elseif($fila->Jueves)
             {
                 // Recibo el texto de la celda que contiene el lapso de tiempo en que se da la clase
-                $texto = $fila[$i]->Jueves;
+                $texto = $fila->Jueves;
 
                 // Todas las horas tienen el mismo formato (HH:MM-HH:MM). Separamos con el guión.
                 // Tomamos los primero dos números de cada parte.
                 $partes = explode('-', $texto);
                 $jue1 = substr($partes[0], 0, 2);
                 $jue2 = substr($partes[1], 0, 2);
-
-                // Se agrega a las variables
-                $variables[] = 'jueves';
             }
-            elseif($fila[$i]->Viernes)
+            elseif($fila->Viernes)
             {
                 // Recibo el texto de la celda que contiene el lapso de tiempo en que se da la clase
-                $texto = $fila[$i]->Viernes;
+                $texto = $fila->Viernes;
 
                 // Todas las horas tienen el mismo formato (HH:MM-HH:MM). Separamos con el guión.
                 // Tomamos los primero dos números de cada parte.
                 $partes = explode('-', $texto);
                 $vie1 = substr($partes[0], 0, 2);
                 $vie2 = substr($partes[1], 0, 2);
-
-                // Se agrega a las variables
-                $variables[] = 'viernes';
             }
-            elseif($fila[$i]->Sabado)
+            elseif($fila->Sabado)
             {
                 // Recibo el texto de la celda que contiene el lapso de tiempo en que se da la clase
-                $texto = $fila[$i]->Sabado;
+                $texto = $fila->Sabado;
 
                 // Todas las horas tienen el mismo formato (HH:MM-HH:MM). Separamos con el guión.
                 // Tomamos los primero dos números de cada parte.
                 $partes = explode('-', $texto);
                 $sab1 = substr($partes[0], 0, 2);
                 $sab2 = substr($partes[1], 0, 2);
-
-                // Se agrega a las variables
-                $variables[] = 'sabado';
             }
-            elseif($fila[$i]->Domingo)
+            elseif($fila->Domingo)
             {
                 // Recibo el texto de la celda que contiene el lapso de tiempo en que se da la clase
-                $texto = $fila[$i]->Domingo;
+                $texto = $fila->Domingo;
 
                 // Todas las horas tienen el mismo formato (HH:MM-HH:MM). Separamos con el guión.
                 // Tomamos los primero dos números de cada parte.
                 $partes = explode('-', $texto);
                 $dom1 = substr($partes[0], 0, 2);
                 $dom2 = substr($partes[1], 0, 2);
-
-                // Se agrega a las variables
-                $variables[] = 'domingo';
             }
-
 
             // Verificamos si el NRC actual es igual al anterior
             if($actual != $anterior)
             {
                 
                 // Llenamos la información del NRC
-                $cursos[$i] = [
-                    'nrc' => $fila[$i]->Nrc,
-                    'materia' => $fila[$i]->Materia,
-                    'curso' => $fila[$i]->Curso,
-                    'seccion' => $fila[$i]->Seccion,
-                    'creditos' => $fila[$i]->Creditos,
-                    'nombre' => $fila[$i]->Nombre_asignatura,
-                    'capacidad' => $fila[$i]->Capacidad,
-                    'disponibles' => $fila[$i]->Disponibles,
-                    'ocupados' => $fila[$i]->Ocupados,
-                    'codigo' => $fila[$i]->Codigo_docente,
-                    'docente' => $fila[$i]->Docente,
-                    // 'lunes' => [$lun1, $lun2],
-                    // 'martes' => [$mar1, $mar2],
-                    // 'miercoles' => [$mie1, $mie2],
-                    // 'jueves' => [$jue1, $jue2],
-                    // 'viernes' => [$vie1, $vie2],
-                    // 'sabado' => [$sab1, $sab2],
-                    // 'domingo' => [$dom1, $dom2],
-                    // 'edificio' => $fila[$i]->Edf,
-                    // 'salon' => $fila[$i]->Salon,
-                    'inicio' => $fila[$i]->Fecha_inicio,
-                    'tipo' => $fila[$i]->Tipo,
-                    'horas' => $Hrs_sem
+                $cursos[$fila->Nrc] = [
+                    'materia' => $fila->Materia,
+                    'curso' => $fila->Curso,
+                    'seccion' => $fila->Seccion,
+                    'creditos' => $fila->Creditos,
+                    'nombre' => $fila->Nombre_asignatura,
+                    'capacidad' => $fila->Capacidad,
+                    'disponibles' => $fila->Disponibles,
+                    'ocupados' => $fila->Ocupados,
+                    'codigo' => $fila->Codigo_docente,
+                    'docente' => $fila->Docente,
+                    'lunes' => [$lun1, $lun2],
+                    'martes' => [$mar1, $mar2],
+                    'miercoles' => [$mie1, $mie2],
+                    'jueves' => [$jue1, $jue2],
+                    'viernes' => [$vie1, $vie2],
+                    'sabado' => [$sab1, $sab2],
+                    'domingo' => [$dom1, $dom2],
+                    'edificio' => $fila->Edf,
+                    'salon' => $fila->Salon,
+                    'inicio' => $fila->Fecha_inicio,
+                    'tipo' => $fila->Tipo,
+                    'horas' => $fila->Hrs_sem
                 ];
 
             }
-            // else
-            // {
-            //     dd($fila[$i]->Creditos);
-            //     // $cursos[$fila[$i]->Nrc]['horas'] += $fila[$i]->Hrs_sem;
-                
-            //     // Llenamos la información del NRC
-            //     $cursos[$fila[$i]->Nrc] = [
-            //         'lunes' => [$lun1, $lun2],
-            //         'martes' => [$mar1, $mar2],
-            //         'miercoles' => [$mie1, $mie2],
-            //         'jueves' => [$jue1, $jue2],
-            //         'viernes' => [$vie1, $vie2],
-            //         'sabado' => [$sab1, $sab2],
-            //         'domingo' => [$dom1, $dom2],
-            //         'edificio' => $fila[$i]->Edf,
-            //         'salon' => $fila[$i]->Salon
-            //     ];
-
-            // }
 
             $anterior = $actual;
 
