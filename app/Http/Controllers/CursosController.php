@@ -27,7 +27,7 @@ class CursosController extends Controller
             $fila = DB::select('select * from cursos where Nombre_asignatura = "'.$nombre.'" limit 1');
             $fila = $fila[0];
 
-            // 5. Guardamos la información básica en el array de cursos.
+            // 5. Guardamos la información en el array de cursos.
             $cursos[$nombre] = [
                 'materia' => $fila->Materia,
                 'curso' => $fila->Curso,
@@ -37,24 +37,33 @@ class CursosController extends Controller
             ];
 
             // 6. Obtenemos todos los NRC del curso
-            $lista_nrc = DB::select('select distinct Nrc from cursos where Nombre_asignatura = "'.$nombre.'"');
-
+            $lista_nrc = DB::select('select distinct Nrc from cursos where Nombre_asignatura = "CREATIVIDAD Y EMPRENDIMIENTO"');
+            
             // 7. Guardamos los NRC en el array de cursos
             foreach ($lista_nrc as $nrc) {
 
                 $nrc = $nrc->Nrc;
                 
-                // 8. Obtenemos la información de cada NRC
-                $info = DB::select('select * from cursos where Nombre_asignatura = "'.$nombre.'" and Nrc = "'.$nrc.'"');
+                // 8. Obtenemos la primera fila de cada NRC.
+                $info = DB::select('select * from cursos where Nombre_asignatura = "CREATIVIDAD Y EMPRENDIMIENTO" and Nrc = "'.$nrc.'" limit 1');
+                $info = $info[0];
                 
-
-                $cursos[$nombre][$nrc] = [];
+                // 9. Guardamos la información en el array de cursos.
+                $cursos[$nombre][$nrc] = [
+                    'seccion' => $info->Seccion,
+                    'capacidad' => $info->Capacidad,
+                    'disponibles' => $info->Disponibles,
+                    'ocupados' => $info->Ocupados,
+                    'codigo_docente' => $info->Codigo_docente,
+                    'docente' => $info->Docente,
+                    'tipo' => $info->Tipo
+                ];
 
             }
-
+            
         }
 
-        dd($cursos);
+        dd($cursos['FUNDAMENTOS DE ADMINISTRACION'][1100]);
 
         return view('index');
     }
