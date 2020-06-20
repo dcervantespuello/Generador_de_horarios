@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use App\Http\Controllers\CursosController;
 
 class CursosController extends Controller
 {
@@ -68,27 +69,18 @@ class CursosController extends Controller
                     $texto_malo = $dato->Hrs_sem;
                     $subcadena = substr($texto_malo, 0, 1);
                     $hrs_sem = intval($subcadena);
+
+                    // ?. Obtenemos el día de la semana que tiene la hora de clase
+                    $dia = CursosController::obtenerDia($dato->Lunes, $dato->Martes, $dato->Miercoles, $dato->Jueves, $dato->Viernes, $dato->Sabado, $dato->Domingo);
                     
-                    // 12. En cada fila de cada NRC revisamos si hay horas en cada día de la semana
-                    if($dato->Lunes){
-
-                        // 13. Sustraemos las horas del texto de la celda
-                        $texto = $dato->Lunes;
-
-                        $partes = explode('-', $texto);
-                        $hora1 = substr($partes[0], 0, 2);
-                        $hora2 = substr($partes[1], 0, 2);
-
-                        // 14. Agregamos la información en el array de cursos
-                        $cursos[$nombre][$nrc]['lunes'] = [
-                            'hora1' => $hora1,
-                            'hora2' => $hora2,
-                            'edificio' => $dato->Edf,
-                            'salon' => $dato->Salon,
-                            'semanales' => $hrs_sem
-                        ];
-
-                    }
+                    // ?. Agregamos la información en el array de cursos
+                    $cursos[$nombre][$nrc][$dia[0]] = [
+                        'hora1' => $dia[1],
+                        'hora2' => $dia[2],
+                        'edificio' => $dato->Edf,
+                        'salon' => $dato->Salon,
+                        'semanales' => $hrs_sem
+                    ];
 
                 }
 
@@ -96,13 +88,18 @@ class CursosController extends Controller
             
         }
 
-        dd($cursos);
+        dd($cursos['CREATIVIDAD Y EMPRENDIMIENTO']);
 
         return view('index');
+
     }
+
 
     public function obtenerDia($lun, $mar, $mie, $jue, $vie, $sab, $dom)
     {
+
+        // Array donde vamos a guardar el nombre del día y las horas
+        $dia = [];
 
         if($lun) {
 
@@ -178,5 +175,5 @@ class CursosController extends Controller
 
         return $dia;
     }
-    
+
 }
