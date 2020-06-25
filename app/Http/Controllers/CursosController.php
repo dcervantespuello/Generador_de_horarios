@@ -27,7 +27,7 @@ class CursosController extends Controller
 
             // 4. Guardamos la información en el array de cursos.
             $cursos[$nombre] = [
-                'materia' => $fila->Materia,
+                // 'materia' => $fila->Materia,
                 'curso' => $fila->Curso,
                 'campus' => $fila->Campus,
                 'fecha_inicio' => $fila->Fecha_inicio,
@@ -43,11 +43,14 @@ class CursosController extends Controller
                 $nrc = $nrc->Nrc;
                 
                 // 7. Obtenemos la primera fila de cada NRC.
+                
                 $info = DB::select('select * from cursos where Nombre_asignatura = "'.$nombre.'" and Nrc = "'.$nrc.'" limit 1');
                 $info = $info[0];
                 
                 // 8. Guardamos la información en el array de cursos.
                 $cursos[$nombre][$nrc] = [
+                    'materia' => $info->Materia,
+                    'curso' => $info->Curso,
                     'seccion' => $info->Seccion,
                     'capacidad' => $info->Capacidad,
                     'disponibles' => $info->Disponibles,
@@ -88,6 +91,31 @@ class CursosController extends Controller
         return view('index', ['cursos' => $cursos]);
 
     }
+
+
+    public function agregar(Request $request)
+    {
+        $nombre = $request->nombre;
+        $creditos = $request->creditos;
+        $cantidad = $request->cantidad;
+        $contenido = json_decode($request->contenido);
+
+        $array = ['nombre' => $nombre, 'creditos' => $creditos, 'cantidad' => $cantidad, 'contenido' => $contenido];
+        $json = json_encode($array);
+        echo $json;
+    }
+
+    public function quitar(Request $request)
+    {   
+        $nombre = $request->nombre;
+        $creditos = $request->creditos;
+        $cantidad = $request->cantidad;
+        
+        $array = ['nombre' => $nombre, 'creditos' => $creditos, 'cantidad' => $cantidad];
+        $json = json_encode($array);
+        echo $json;
+    }
+
 
 
     public function obtenerDia($lun, $mar, $mie, $jue, $vie, $sab, $dom)
