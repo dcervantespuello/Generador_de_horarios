@@ -93,29 +93,10 @@ class CursosController extends Controller
     }
 
 
-    public function agregar(Request $request)
+    public function hill_climbing(Request $request)
     {
-        $nombre = $request->nombre;
-        $creditos = $request->creditos;
-        $cantidad = $request->cantidad;
-        $contenido = json_decode($request->contenido);
-
-        $array = ['nombre' => $nombre, 'creditos' => $creditos, 'cantidad' => $cantidad, 'contenido' => $contenido];
-        $json = json_encode($array);
-        echo $json;
+        dd($request->all());
     }
-
-    public function quitar(Request $request)
-    {   
-        $nombre = $request->nombre;
-        $creditos = $request->creditos;
-        $cantidad = $request->cantidad;
-        
-        $array = ['nombre' => $nombre, 'creditos' => $creditos, 'cantidad' => $cantidad];
-        $json = json_encode($array);
-        echo $json;
-    }
-
 
 
     public function obtenerDia($lun, $mar, $mie, $jue, $vie, $sab, $dom)

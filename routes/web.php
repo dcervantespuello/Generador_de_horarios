@@ -15,6 +15,4 @@ use Illuminate\Support\Facades\Route;
 
 Route::get('/', 'CursosController@index')->name('index');
 
-Route::post('/agregar','CursosController@agregar')->name('agregar');
-
-Route::post('/quitar','CursosController@quitar')->name('quitar');
+Route::post('/hill_climbing','CursosController@hill_climbing')->name('hill_climbing');

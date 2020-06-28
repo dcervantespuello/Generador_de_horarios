@@ -48,18 +48,21 @@
                     </ul>
                 </div>
             </div>
-            <table class="table table-hover" id='seleccionados'>
-                <thead>
-                    <tr>
-                        <th>Nombre de curso</th>
-                        <th>Créditos</th>
-                        <th>Acción</th>
-                    </tr>
-                </thead>
-                <tbody>
-                </tbody>
-            </table>
-            <p id="fila_cero">¡No hay cursos seleccionados!</p>
+            <form action="{{route('hill_climbing')}}" method="post">
+                @csrf
+                <table class="table table-hover" id='seleccionados'>
+                    <thead>
+                        <tr>
+                            <th>Nombre de curso</th>
+                            <th>Créditos</th>
+                            <th>Acción</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    </tbody>
+                </table>
+                <p id="fila_cero">¡No hay cursos seleccionados!</p>
+            </form>
         </div>
     </div>
 </div>
