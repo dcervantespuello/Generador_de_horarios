@@ -12,7 +12,7 @@
         <div class="col-7">
             <div class="form-group">
                 <input type="text" class="form-control pull-right" id="buscador"
-                    placeholder="Escribe el nombre del curso que quieras agregar...">
+                    placeholder="Escribe el nombre del curso que quieras agregar a tu horario.">
             </div>
             <table class="table table-hover<" id="cursos">
                 <thead>
@@ -58,11 +58,18 @@
                 </thead>
                 <tbody>
                 </tbody>
+                <tfoot id='pie'>
+                    <tr>
+                        <th>Total Créditos</th>
+                        <th></th>
+                        <th></th>
+                    </tr>
+                </tfoot>
             </table>
             <p id="fila_cero">¡No hay cursos seleccionados!</p>
             <div class="row justify-content-center">
                 <div class="col">
-                    <button type="button" class="btn btn-primary btn-block btn-lg" id="enviar">Generar mi
+                    <button type="button" class="btn btn-primary btn-block btn-lg" id="enviar" onclick="enviar()">Generar mi
                         Horario</button>
                 </div>
             </div>
