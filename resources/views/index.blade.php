@@ -48,21 +48,24 @@
                     </ul>
                 </div>
             </div>
-            <form action="{{route('hill_climbing')}}" method="post">
-                @csrf
-                <table class="table table-hover" id='seleccionados'>
-                    <thead>
-                        <tr>
-                            <th>Nombre de curso</th>
-                            <th>Créditos</th>
-                            <th>Acción</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                    </tbody>
-                </table>
-                <p id="fila_cero">¡No hay cursos seleccionados!</p>
-            </form>
+            <table class="table table-hover" id='seleccionados'>
+                <thead>
+                    <tr>
+                        <th>Nombre de curso</th>
+                        <th>Créditos</th>
+                        <th>Acción</th>
+                    </tr>
+                </thead>
+                <tbody>
+                </tbody>
+            </table>
+            <p id="fila_cero">¡No hay cursos seleccionados!</p>
+            <div class="row justify-content-center">
+                <div class="col">
+                    <button type="button" class="btn btn-primary btn-block btn-lg" id="enviar">Generar mi
+                        Horario</button>
+                </div>
+            </div>
         </div>
     </div>
 </div>

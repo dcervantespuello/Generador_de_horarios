@@ -95,10 +95,10 @@ class CursosController extends Controller
 
     public function hill_climbing(Request $request)
     {
-        dd($request->all());
+        
     }
 
-
+    
     public function obtenerDia($lun, $mar, $mie, $jue, $vie, $sab, $dom)
     {
 
