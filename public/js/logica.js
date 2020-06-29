@@ -9,7 +9,7 @@ function agregar(nombre, creditos) {
     var filas = document.getElementById('seleccionados').children[1].children;
 
     for (var i = 0; i < filas.length; i++) {
-        contenido[i] = [filas[i].children[0].textContent.trim(), filas[i].children[1].textContent.trim()];
+        contenido[i] = [filas[i].children[0].children[0].value.trim(), filas[i].children[1].textContent.trim()];
     }
 
     // Saber si el curso a agregar ya está en la tabla
@@ -31,7 +31,7 @@ function agregar(nombre, creditos) {
         // Si la cantidad era cero...
         if (cantidad == 0) {
             // Quita el parrafo si el número de filas en la tabla de seleccionados era cero
-            fila_cero.innerHTML = "";
+            fila_cero.style.display = 'none';
 
             // Mostrar el botón para generar horario
             document.getElementById('enviar').style.display = 'block';
@@ -63,10 +63,7 @@ function agregar(nombre, creditos) {
 
             // Se coloca la tabla a la derecha
             for (var k = 0; k < contenido.length; k++) {
-                document.getElementById("seleccionados").children[1].insertRow(-1).innerHTML =
-                    '<tr><td>' + contenido[k][0] + '</td><td>' + contenido[k][1] +
-                    '</td><td><input class="btn btn-danger btn-quitar" type="button" value="Quitar" onclick = \'quitar("' +
-                    contenido[k][0] + '", "' + contenido[k][1] + '")\'></td></tr>';
+                document.getElementById("seleccionados").children[1].insertRow(-1).innerHTML = '<tr><td><input type="text" name="nombres[]" readonly class="form-control-plaintext nombre" value="' + contenido[k][0] + '"></td><td>' + contenido[k][1] + '</td><td><input class="btn btn-danger btn-quitar" type="button" value="Quitar" onclick = \'quitar("' + contenido[k][0] + '", "' + contenido[k][1] + '")\'></td></tr>';
             }
 
         } else {
@@ -87,7 +84,7 @@ function quitar(nombre, creditos) {
     var filas = document.getElementById('seleccionados').children[1].children;
 
     for (var i = 0; i < filas.length; i++) {
-        contenido[i] = [filas[i].children[0].textContent.trim(), filas[i].children[1].textContent.trim()];
+        contenido[i] = [filas[i].children[0].children[0].value.trim(), filas[i].children[1].textContent.trim()];
     }
 
     // Posición del elemento a eliminar
@@ -107,10 +104,7 @@ function quitar(nombre, creditos) {
 
     // Se coloca la tabla a la derecha
     for (var k = 0; k < contenido.length; k++) {
-        document.getElementById("seleccionados").children[1].insertRow(-1).innerHTML =
-            '<tr><td>' + contenido[k][0] + '</td><td>' + contenido[k][1] +
-            '</td><td><input class="btn btn-danger btn-quitar" type="button" value="Quitar" onclick = \'quitar("' +
-            contenido[k][0] + '", "' + contenido[k][1] + '")\'></td></tr>';
+        document.getElementById("seleccionados").children[1].insertRow(-1).innerHTML = '<tr><td><input type="text" name="nombres[]" readonly class="form-control-plaintext nombre" value="' + contenido[k][0] + '"></td><td>' + contenido[k][1] + '</td><td><input class="btn btn-danger btn-quitar" type="button" value="Quitar" onclick = \'quitar("' + contenido[k][0] + '", "' + contenido[k][1] + '")\'></td></tr>';
     }
 
     // Obtenemos la suma de todos los créditos
@@ -130,7 +124,7 @@ function quitar(nombre, creditos) {
     // Si la cantidad de filas llega a cero...
     if (cantidad == 0) {
         // Quita el párrafo debajo de la tabla
-        document.getElementById('fila_cero').innerHTML = "¡No hay cursos seleccionados!";
+        document.getElementById('fila_cero').style.display = 'block';
 
         // Ocultamos el botón de generar horario
         document.getElementById('enviar').style.display = 'none';

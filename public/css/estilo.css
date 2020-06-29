@@ -27,3 +27,7 @@ h1 {
 #pie {
     display: none;
 }
+
+.nombre {
+    text-align: center;
+}

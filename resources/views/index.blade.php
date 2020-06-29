@@ -9,7 +9,7 @@
         </div>
     </div>
     <div class="row">
-        <div class="col-7">
+        <div class="col-6">
             <div class="form-group">
                 <input type="text" class="form-control pull-right" id="buscador"
                     placeholder="Escribe el nombre del curso que quieras agregar a tu horario.">
@@ -40,7 +40,7 @@
                 </tbody>
             </table>
         </div>
-        <div class="col-5">
+        <div class="col-6">
             <h3>CURSOS SELECCIONADOS</h3>
             <div class="row">
                 <div class="col mb-2" id='errores'>
@@ -48,31 +48,34 @@
                     </ul>
                 </div>
             </div>
-            <table class="table table-hover" id='seleccionados'>
-                <thead>
-                    <tr>
-                        <th>Nombre de curso</th>
-                        <th>Créditos</th>
-                        <th>Acción</th>
-                    </tr>
-                </thead>
-                <tbody>
-                </tbody>
-                <tfoot id='pie'>
-                    <tr>
-                        <th>Total Créditos</th>
-                        <th></th>
-                        <th></th>
-                    </tr>
-                </tfoot>
-            </table>
-            <p id="fila_cero">¡No hay cursos seleccionados!</p>
-            <div class="row justify-content-center">
-                <div class="col">
-                    <button type="button" class="btn btn-primary btn-block btn-lg" id="enviar" onclick="enviar()">Generar mi
-                        Horario</button>
+            <form action="{{ route('hill_climbing') }}" method="post">
+                @csrf
+                <table class="table table-hover" id='seleccionados'>
+                    <thead>
+                        <tr>
+                            <th>Nombre de curso</th>
+                            <th>Créditos</th>
+                            <th>Acción</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    </tbody>
+                    <tfoot id='pie'>
+                        <tr>
+                            <th>Total Créditos</th>
+                            <th></th>
+                            <th></th>
+                        </tr>
+                    </tfoot>
+                </table>
+                <p id="fila_cero">¡No hay cursos seleccionados!</p>
+                <div class="row justify-content-center">
+                    <div class="col">
+                        <button type="submit" class="btn btn-primary btn-block btn-lg" id="enviar">Generar mi
+                            Horario</button>
+                    </div>
                 </div>
-            </div>
+            </form>
         </div>
     </div>
 </div>

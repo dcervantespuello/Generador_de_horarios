@@ -20,54 +20,7 @@ class CursosController extends Controller
 
     public function hill_climbing(Request $request)
     {
-        // Recibiendo nombres de cursos
-        $nombres = json_decode($request->contenido);
-
-        // Obteniendo los cursos de la base de datos
-        $cursos = CursosController::obtenerCursos();
-
-        // Semana de clases
-        $semana = CursosController::obtenerSemana();
-
-        // Número de iteraciones de la metaheurística
-        $iteraciones = 200000;
-
-        while ($iteraciones > 0) {
-
-            // Aquí se están recorriendo los nombres de la lista recibida
-            foreach ($nombres as $nombre) {
-
-                // Aquí se están evaluando los NRC de cada nombre de curso
-                foreach ($cursos[$nombre] as $nrc => $info1) {
-
-                    if ($nrc != 'campus' and $nrc != 'fecha_inicio' and $nrc != 'creditos') {
-                        
-                        // Aquí se están revisando todos los día de la semana de cada NRC
-                        foreach ($cursos[$nombre][$nrc] as $dia => $info2) {
-                            
-                            if ($dia != 'materia' and $dia != 'curso' and $dia != 'seccion' and $dia != 'capacidad' and $dia != 'disponibles' and $dia != 'ocupados' and $dia != 'codigo_docente' and $dia != 'docente' and $dia != 'tipo') {
-                                
-                                $hora1 = $cursos[$nombre][$nrc][$dia]['hora1'];
-                                $hora2 = $cursos[$nombre][$nrc][$dia]['hora2'];
-
-                                
-
-                            }
-                            
-                        }
-
-                    }
-
-                }
-
-            }
-
-        }
-
-        // $arreglo = ['nombre' => $cursos[$nombre]];
-        // $json = json_encode($arreglo);
-        // return $json;
-
+        
     }
 
     
