@@ -95,7 +95,15 @@ class CursosController extends Controller
 
     public function hill_climbing(Request $request)
     {
+        // Recibiendo variables
+        $nombres = json_decode($request->contenido);
         
+        // Preparando el array a retornar
+        $arreglo = ['nombres' => $nombres];
+        $json = json_encode($arreglo);
+
+        // Enviando de regreso
+        echo $json;
     }
 
     
