@@ -167,7 +167,6 @@ function enviar() {
     }
 
     $.ajax({
-
         url: "/hill_climbing",
         type: 'post',
         timeout: 10000,
