@@ -18,7 +18,7 @@
     <title>HORARIOS UTB</title>
 </head>
 
-<body>
+<body id='body'>
 
     @yield('contenido')
 
@@ -41,6 +41,46 @@
             'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
         }
     });
+
+    function enviar() {
+
+        // Tomando todo el contenido de la tabla de la lista de cursos seleccionados
+        var contenido = [];
+
+        var filas = document.getElementById('seleccionados').children[1].children;
+
+        for (var i = 0; i < filas.length; i++) {
+            contenido[i] = filas[i].children[0].textContent.trim();
+        }
+
+        $.ajax({
+            url: "{{ route('hill_climbing') }}",
+            type: 'post',
+            timeout: 100000,
+            dataType: 'json',
+            data: {
+                'contenido': JSON.stringify(contenido)
+            },
+            beforeSend: function() {
+                $('#enviar').html('<img src="img/loader.gif" alt="loading" class="mb-1" />');
+            },
+            error: function() {
+                document.getElementById('lista').innerHTML =
+                    '<li style="text-align:center; color:red;" class="py-3">Ha surgido un error.</li>';
+                alert('Ha surgido un error.')
+            },
+            success: function(response) {
+                console.log(response);
+            },
+            statusCode: {
+                404: function() {
+                    alert('web not found');
+                }
+            }
+
+        });
+
+    }
     </script>
     <script src="{{ asset('js/logica.js') }}"></script>
 

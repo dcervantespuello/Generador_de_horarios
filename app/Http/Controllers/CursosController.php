@@ -10,84 +10,9 @@ class CursosController extends Controller
 {
     public function index()
     {
-
-        // 1. Inicializamos el array donde se va a organizar la información
-        $cursos = [];
-
-        // 2. Capturamos todos los nombres de la base de datos sin repetir.
-        $nombres = DB::select('select distinct Nombre_asignatura from cursos');
+        // Obteniendo los cursos de la base de datos
+        $cursos = CursosController::obtenerCursos();
         
-        foreach ($nombres as $nombre) {
-
-            $nombre = $nombre->Nombre_asignatura;
-            
-            // 3. Obtenemos la primera fila de cada curso.
-            $fila = DB::select('select * from cursos where Nombre_asignatura = "'.$nombre.'" limit 1');
-            $fila = $fila[0];
-
-            // 4. Guardamos la información en el array de cursos.
-            $cursos[$nombre] = [
-                // 'materia' => $fila->Materia,
-                'curso' => $fila->Curso,
-                'campus' => $fila->Campus,
-                'fecha_inicio' => $fila->Fecha_inicio,
-                'creditos' => $fila->Creditos
-            ];
-
-            // 5. Obtenemos todos los NRC del curso
-            $lista_nrc = DB::select('select distinct Nrc from cursos where Nombre_asignatura = "'.$nombre.'"');
-            
-            // 6. Guardamos los NRC en el array de cursos
-            foreach ($lista_nrc as $nrc) {
-
-                $nrc = $nrc->Nrc;
-                
-                // 7. Obtenemos la primera fila de cada NRC.
-                
-                $info = DB::select('select * from cursos where Nombre_asignatura = "'.$nombre.'" and Nrc = "'.$nrc.'" limit 1');
-                $info = $info[0];
-                
-                // 8. Guardamos la información en el array de cursos.
-                $cursos[$nombre][$nrc] = [
-                    'materia' => $info->Materia,
-                    'curso' => $info->Curso,
-                    'seccion' => $info->Seccion,
-                    'capacidad' => $info->Capacidad,
-                    'disponibles' => $info->Disponibles,
-                    'ocupados' => $info->Ocupados,
-                    'codigo_docente' => $info->Codigo_docente,
-                    'docente' => $info->Docente,
-                    'tipo' => $info->Tipo
-                ];
-
-                // 9. Obtenemos las filas de cada NRC.
-                $datos_nrc = DB::select('select * from cursos where Nombre_asignatura = "'.$nombre.'" and Nrc = "'.$nrc.'"');
-                
-                foreach ($datos_nrc as $dato) {
-
-                    // 10. Arreglamos el Hrs_sem para que no tenga \r al final.
-                    $texto_malo = $dato->Hrs_sem;
-                    $subcadena = substr($texto_malo, 0, 1);
-                    $hrs_sem = intval($subcadena);
-
-                    // 11. Obtenemos el día de la semana que tiene la hora de clase
-                    $dia = CursosController::obtenerDia($dato->Lunes, $dato->Martes, $dato->Miercoles, $dato->Jueves, $dato->Viernes, $dato->Sabado, $dato->Domingo);
-                    
-                    // 12. Agregamos la información en el array de cursos
-                    $cursos[$nombre][$nrc][$dia[0]] = [
-                        'hora1' => $dia[1],
-                        'hora2' => $dia[2],
-                        'edificio' => $dato->Edf,
-                        'salon' => $dato->Salon,
-                        'semanales' => $hrs_sem
-                    ];
-
-                }
-
-            }
-            
-        }
-
         return view('index', ['cursos' => $cursos]);
 
     }
@@ -95,15 +20,27 @@ class CursosController extends Controller
 
     public function hill_climbing(Request $request)
     {
-        // Recibiendo variables
+        // Recibiendo nombres de cursos
         $nombres = json_decode($request->contenido);
-        
-        // Preparando el array a retornar
-        $arreglo = ['nombres' => $nombres];
-        $json = json_encode($arreglo);
 
-        // Enviando de regreso
-        echo $json;
+        // Obteniendo los cursos de la base de datos
+        $cursos = CursosController::obtenerCursos();
+
+        // Número de iteraciones de la metaheurística
+        $iteraciones = 200000;
+
+        while ($iteraciones > 0) {
+
+            foreach ($nombres as $nombre) {
+
+                $arreglo = ['nombre' => $cursos[$nombre]];
+                $json = json_encode($arreglo);
+                return $json;
+
+            }
+
+        }
+
     }
 
     
@@ -186,6 +123,88 @@ class CursosController extends Controller
         }
 
         return $dia;
+    }
+
+
+    public function obtenerCursos() 
+    {
+        // 1. Inicializamos el array donde se va a organizar la información
+        $cursos = [];
+
+        // 2. Capturamos todos los nombres de la base de datos sin repetir.
+        $nombres = DB::select('select distinct Nombre_asignatura from cursos');
+        
+        foreach ($nombres as $nombre) {
+
+            $nombre = $nombre->Nombre_asignatura;
+            
+            // 3. Obtenemos la primera fila de cada curso.
+            $fila = DB::select('select * from cursos where Nombre_asignatura = "'.$nombre.'" limit 1');
+            $fila = $fila[0];
+
+            // 4. Guardamos la información en el array de cursos.
+            $cursos[$nombre] = [
+                'campus' => $fila->Campus,
+                'fecha_inicio' => $fila->Fecha_inicio,
+                'creditos' => $fila->Creditos
+            ];
+
+            // 5. Obtenemos todos los NRC del curso
+            $lista_nrc = DB::select('select distinct Nrc from cursos where Nombre_asignatura = "'.$nombre.'"');
+            
+            // 6. Guardamos los NRC en el array de cursos
+            foreach ($lista_nrc as $nrc) {
+
+                $nrc = $nrc->Nrc;
+                
+                // 7. Obtenemos la primera fila de cada NRC.
+                
+                $info = DB::select('select * from cursos where Nombre_asignatura = "'.$nombre.'" and Nrc = "'.$nrc.'" limit 1');
+                $info = $info[0];
+                
+                // 8. Guardamos la información en el array de cursos.
+                $cursos[$nombre][$nrc] = [
+                    'materia' => $info->Materia,
+                    'curso' => $info->Curso,
+                    'seccion' => $info->Seccion,
+                    'capacidad' => $info->Capacidad,
+                    'disponibles' => $info->Disponibles,
+                    'ocupados' => $info->Ocupados,
+                    'codigo_docente' => $info->Codigo_docente,
+                    'docente' => $info->Docente,
+                    'tipo' => $info->Tipo
+                ];
+
+                // 9. Obtenemos las filas de cada NRC.
+                $datos_nrc = DB::select('select * from cursos where Nombre_asignatura = "'.$nombre.'" and Nrc = "'.$nrc.'"');
+                
+                foreach ($datos_nrc as $dato) {
+
+                    // 10. Arreglamos el Hrs_sem para que no tenga \r al final.
+                    $texto_malo = $dato->Hrs_sem;
+                    $subcadena = substr($texto_malo, 0, 1);
+                    $hrs_sem = intval($subcadena);
+
+                    // 11. Obtenemos el día de la semana que tiene la hora de clase
+                    $dia = CursosController::obtenerDia($dato->Lunes, $dato->Martes, $dato->Miercoles, $dato->Jueves, $dato->Viernes, $dato->Sabado, $dato->Domingo);
+                    
+                    // 12. Agregamos la información en el array de cursos
+                    $cursos[$nombre][$nrc][$dia[0]] = [
+                        'hora1' => $dia[1],
+                        'hora2' => $dia[2],
+                        'edificio' => $dato->Edf,
+                        'salon' => $dato->Salon,
+                        'semanales' => $hrs_sem
+                    ];
+
+                }
+
+            }
+            
+        }
+
+        return $cursos;
+
     }
 
 }
