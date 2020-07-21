@@ -20,7 +20,98 @@ class CursosController extends Controller
 
     public function hill_climbing(Request $request)
     {
+        // Recibiendo nombres de cursos - OK
+        $nombres = $request->input('nombres');
         
+        // Obteniendo los cursos de la base de datos - OK
+        $cursos = CursosController::obtenerCursos();
+        
+        // Semana de clases - OK
+        $semana = CursosController::obtenerSemana();
+        
+        // Número de iteraciones de la metaheurística
+        $iteraciones = 200000;
+
+
+
+        // PASO 1: GENERAR SOLUCIÓN ALEATORIA X
+        
+
+        // Curso que todos sus NRC se cruzan
+        $cruzados = [];
+
+        // Aquí se están recorriendo los nombres de la lista recibida
+        foreach ($nombres as $nombre) {
+
+            // Aquí se están evaluando los NRC de cada nombre de curso
+            foreach ($cursos[$nombre] as $nrc => $val1) {
+                if ($nrc == '1019') {
+                    continue;
+                }
+
+                if ($nrc != 'campus' and $nrc != 'fecha_inicio' and $nrc != 'creditos') {
+
+                    // NRC aceptado
+                    $aceptado = false;
+
+                    // Último NRC
+                    $ultimo_nrc = CursosController::endKey($cursos[$nombre]);
+
+                    // Último día del NRC
+                    $ultimo_dia = CursosController::endKey($cursos[$nombre][$nrc]);
+                    
+                    // Aquí se están revisando todos los día de la semana de cada NRC
+                    foreach ($cursos[$nombre][$nrc] as $dia => $val2) {
+                        
+                        if ($dia != 'materia' and $dia != 'curso' and $dia != 'seccion' and $dia != 'capacidad' and $dia != 'disponibles' and $dia != 'ocupados' and $dia != 'codigo_docente' and $dia != 'docente' and $dia != 'tipo') {
+                            
+                            $hora1 = $cursos[$nombre][$nrc][$dia]['hora1'];
+                            $hora2 = $cursos[$nombre][$nrc][$dia]['hora2'];
+
+                            if (empty($semana[$dia][$hora1]) and empty($semana[$dia][$hora2])) {
+                                
+                                $semana[$dia][$hora1] = $nrc;
+                                $semana[$dia][$hora2] = $nrc;
+
+                                if ($dia == $ultimo_dia) {
+                                    $aceptado = true;
+                                    break;
+                                }
+
+                            } else {
+                                
+                                // Se quita el NRC de toda la semana
+                                foreach ($semana as $day => $hours) {
+                                    foreach ($hours as $hour => $time) {
+                                        if ($time == $nrc) {
+                                            $semana[$day][$hour] = '';
+                                        }
+                                    }
+                                }
+
+                                break;
+                            }
+
+                        }
+                        
+                    }
+                    
+                    if ($aceptado) {
+                        break;
+                    }
+
+                    if ($nrc == $ultimo_nrc) {
+                        $cruzados[] = $nombre;
+                    }
+
+                }
+
+            }
+
+        }
+
+        dd($semana, $cruzados);
+
     }
 
     
@@ -192,129 +283,31 @@ class CursosController extends Controller
     {
         $semana = [
             
-            'lunes' => [
-                '07' => '',
-                '08' => '',
-                '09' => '',
-                '10' => '',
-                '11' => '',
-                '12' => '',
-                '13' => '',
-                '14' => '',
-                '15' => '',
-                '16' => '',
-                '17' => '',
-                '18' => '',
-                '19' => '',
-                '20' => ''
-            ],
-
-            'martes' => [
-                '07' => '',
-                '08' => '',
-                '09' => '',
-                '10' => '',
-                '11' => '',
-                '12' => '',
-                '13' => '',
-                '14' => '',
-                '15' => '',
-                '16' => '',
-                '17' => '',
-                '18' => '',
-                '19' => '',
-                '20' => ''
-            ],
-
-            'miercoles' => [
-                '07' => '',
-                '08' => '',
-                '09' => '',
-                '10' => '',
-                '11' => '',
-                '12' => '',
-                '13' => '',
-                '14' => '',
-                '15' => '',
-                '16' => '',
-                '17' => '',
-                '18' => '',
-                '19' => '',
-                '20' => ''
-            ],
-
-            'jueves' => [
-                '07' => '',
-                '08' => '',
-                '09' => '',
-                '10' => '',
-                '11' => '',
-                '12' => '',
-                '13' => '',
-                '14' => '',
-                '15' => '',
-                '16' => '',
-                '17' => '',
-                '18' => '',
-                '19' => '',
-                '20' => ''
-            ],
-
-            'viernes' => [
-                '07' => '',
-                '08' => '',
-                '09' => '',
-                '10' => '',
-                '11' => '',
-                '12' => '',
-                '13' => '',
-                '14' => '',
-                '15' => '',
-                '16' => '',
-                '17' => '',
-                '18' => '',
-                '19' => '',
-                '20' => ''
-            ],
-
-            'sabado' => [
-                '07' => '',
-                '08' => '',
-                '09' => '',
-                '10' => '',
-                '11' => '',
-                '12' => '',
-                '13' => '',
-                '14' => '',
-                '15' => '',
-                '16' => '',
-                '17' => '',
-                '18' => '',
-                '19' => '',
-                '20' => ''
-            ],
-            
-            'domingo' => [
-                '07' => '',
-                '08' => '',
-                '09' => '',
-                '10' => '',
-                '11' => '',
-                '12' => '',
-                '13' => '',
-                '14' => '',
-                '15' => '',
-                '16' => '',
-                '17' => '',
-                '18' => '',
-                '19' => '',
-                '20' => ''
-            ]
+            'lunes' => ['07' => '', '08' => '', '09' => '', '10' => '', '11' => '', '12' => '', '13' => '', '14' => '', '15' => '', '16' => '', '17' => '', '18' => '', '19' => '', '20' => ''],
+            'martes' => ['07' => '', '08' => '', '09' => '', '10' => '', '11' => '', '12' => '', '13' => '', '14' => '', '15' => '', '16' => '', '17' => '', '18' => '', '19' => '', '20' => ''],
+            'miercoles' => ['07' => '', '08' => '', '09' => '', '10' => '', '11' => '', '12' => '', '13' => '', '14' => '', '15' => '', '16' => '', '17' => '', '18' => '', '19' => '', '20' => ''],
+            'jueves' => ['07' => '', '08' => '', '09' => '', '10' => '', '11' => '', '12' => '', '13' => '', '14' => '', '15' => '', '16' => '', '17' => '', '18' => '', '19' => '', '20' => ''],
+            'viernes' => ['07' => '', '08' => '', '09' => '', '10' => '', '11' => '', '12' => '', '13' => '', '14' => '', '15' => '', '16' => '', '17' => '', '18' => '', '19' => '', '20' => ''],
+            'sabado' => ['07' => '', '08' => '', '09' => '', '10' => '', '11' => '', '12' => '', '13' => '', '14' => '', '15' => '', '16' => '', '17' => '', '18' => '', '19' => '', '20' => ''],
+            'domingo' => ['07' => '', '08' => '', '09' => '', '10' => '', '11' => '', '12' => '', '13' => '', '14' => '', '15' => '', '16' => '', '17' => '', '18' => '', '19' => '', '20' => '']
             
         ];
 
         return $semana;
 
     }
+
+
+    // Returns the key at the end of the array
+    function endKey( $array ){
+
+        //Aquí utilizamos end() para poner el puntero
+        //en el último elemento, no para devolver su valor
+        end( $array );
+
+        return key( $array );
+
+    }
+    
 
 }
