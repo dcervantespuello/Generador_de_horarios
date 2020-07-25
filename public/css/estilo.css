@@ -11,10 +11,6 @@ h3 {
     text-align: center;
 }
 
-#errores {
-    background-color: #fff0f0;
-}
-
 h1 {
     font-size: 45px;
     text-align: center;
@@ -30,4 +26,8 @@ h1 {
 
 .nombre {
     text-align: center;
+}
+
+#errores {
+    display: none;
 }

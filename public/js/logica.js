@@ -23,6 +23,7 @@ function agregar(nombre, creditos) {
 
     if (!encontrado) {
         // Quitamos el mensaje de error
+        document.getElementById('errores').style.display = 'none';
         document.getElementById('lista').innerHTML = '';
 
         // Cantidad de filas actual en la tabla
@@ -67,11 +68,13 @@ function agregar(nombre, creditos) {
             }
 
         } else {
-            document.getElementById('lista').innerHTML = '<li style="text-align:center; color:red;" class="py-3">No puede pasarse de 18 créditos.</li>';
+            document.getElementById('errores').style.display = 'block';
+            document.getElementById('lista').innerHTML = 'No puede pasarse de 18 créditos';
         }
 
     } else {
-        document.getElementById('lista').innerHTML = '<li style="text-align:center; color:red;" class="py-3">' + nombre + ' ya fue agregado.</li>';
+        document.getElementById('errores').style.display = 'block';
+        document.getElementById('lista').innerHTML = nombre + ' ya fue agregado';
     }
 
 }

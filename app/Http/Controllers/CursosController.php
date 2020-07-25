@@ -40,14 +40,14 @@ class CursosController extends Controller
         // Curso que todos sus NRC se cruzan
         $cruzados = [];
 
+        // NRC's elegidos
+        $elegidos = [];
+
         // Aquí se están recorriendo los nombres de la lista recibida
         foreach ($nombres as $nombre) {
 
             // Aquí se están evaluando los NRC de cada nombre de curso
             foreach ($cursos[$nombre] as $nrc => $val1) {
-                if ($nrc == '1019') {
-                    continue;
-                }
 
                 if ($nrc != 'campus' and $nrc != 'fecha_inicio' and $nrc != 'creditos') {
 
@@ -75,6 +75,7 @@ class CursosController extends Controller
 
                                 if ($dia == $ultimo_dia) {
                                     $aceptado = true;
+                                    $elegidos[] = $nrc;
                                     break;
                                 }
 
@@ -109,8 +110,114 @@ class CursosController extends Controller
             }
 
         }
+        
+        // Devolver al estudiante a la selección de cursos si alguno se cruza
+        if ($cruzados) 
+        {
+            $error = "Los NRC de los siguientes cursos se cruzan: ";
 
-        dd($semana, $cruzados);
+            $last = end($cruzados);
+            foreach ($cruzados as $cruzado) {
+
+                if ($last == $cruzado) {
+
+                    $error .= $cruzado;
+
+                } else {
+
+                    $error .= $cruzado.", ";
+
+                }
+
+            }
+
+            return redirect()->back()->with('error', $error);
+        }
+        else
+        {
+
+            //PASO 2: PERTURBAR X PARA OBTENER XP
+
+
+            while ($iteraciones > 0) {
+
+                // Creando una copia de la solución actual
+                $perturbada = $semana;
+                
+                // Obteniendo dos NRC al azar del arrego $elegidos
+                while (true) {
+
+                    if (count($elegidos) == 1) 
+                    {
+                        $nrc1 = $elegidos[0];
+                        break;
+                    }
+                    else
+                    {
+                        $nrc1 = array_rand(array_flip($elegidos));
+                        $nrc2 = array_rand(array_flip($elegidos));
+                        
+                        if ($nrc1 != $nrc2) {
+                            break;
+                        }
+
+                    }
+
+                }
+
+                // Obteniendo los nombres de los cursos del NRC 1 y NRC2
+                foreach ($nombres as $nombre) {
+
+                    foreach ($cursos[$nombre] as $nrc => $val1) {
+
+                        if ($nrc != 'campus' and $nrc != 'fecha_inicio' and $nrc != 'creditos') {
+                            
+                            if ($nrc == $nrc1) 
+                            {
+                                $nombre1 = $nombre;
+                            } 
+                            elseif (isset($nrc2))
+                            {
+                                if ($nrc == $nrc2) 
+                                {
+                                    $nombre2 = $nombre;
+                                }
+
+                            }
+
+                        }
+
+                    }
+
+                }
+                
+                // Se quita el NRC de toda la semana
+                foreach ($perturbada as $day => $hours) {
+
+                    foreach ($hours as $hour => $nrc) {
+                        
+                        if ($nrc == $nrc1) {
+
+                            $perturbada[$day][$hour] = '';
+
+                        }
+                        elseif (isset($nrc2))
+                        {
+                            if ($nrc == $nrc2) 
+                            {
+                                $perturbada[$day][$hour] = '';
+                            }
+                            
+                        } 
+
+                    }
+
+                }
+                
+                
+
+            }
+        }
 
     }
 

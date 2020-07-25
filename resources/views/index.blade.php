@@ -42,11 +42,17 @@
         </div>
         <div class="col-6">
             <h3>CURSOS SELECCIONADOS</h3>
-            <div class="row">
-                <div class="col mb-2" id='errores'>
-                    <ul id='lista' class='my-auto'>
-                    </ul>
-                </div>
+            @if (session('error'))
+            <div class="alert alert-danger">
+                <strong>
+                    <p style="text-align:center;" class='my-auto'>{{ session('error') }}</p>
+                </strong>
+            </div>
+            @endif
+            <div class="alert alert-danger" id="errores">
+                <strong>
+                    <p id='lista' style="text-align:center;" class='my-auto'></p>
+                </strong>
             </div>
             <form action="{{ route('hill_climbing') }}" method="post">
                 @csrf
