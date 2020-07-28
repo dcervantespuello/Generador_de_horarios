@@ -30,7 +30,7 @@ class CursosController extends Controller
         $semana = CursosController::obtenerSemana();
         
         // Número de iteraciones de la metaheurística
-        $iteraciones = 14000;
+        $iteraciones = 10000;
 
 
 
@@ -444,8 +444,28 @@ class CursosController extends Controller
 
 
             }
+            
+            $filas = [];
 
-            dd($semana);
+            for ($i = 7; $i <= 20; $i++) {
+
+                foreach ($semana as $dia => $horas) {
+                 
+                    if ($i < 10) {
+
+                        $filas[$i][] = $semana[$dia]["0".$i];
+
+                    } else {
+
+                        $filas[$i][] = $semana[$dia][$i];
+
+                    }
+
+                }
+
+            }
+
+            return view('resultado', ['semana' => $semana, 'cursos' => $cursos, 'nombres' => $nombres, 'elegidos' => $elegidos, 'filas' => $filas]);
 
         }
 
