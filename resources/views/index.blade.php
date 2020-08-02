@@ -5,16 +5,16 @@
 <div class="container-fluid">
     <div class="row">
         <div class="col">
-            <h1>HORARIOS UTB</h1>
+            <!-- <h1>HORARIOS UTB</h1> -->
         </div>
     </div>
     <div class="row">
         <div class="col-6">
-            <div class="form-group">
+            <!-- <div class="form-group">
                 <input type="text" class="form-control pull-right" id="buscador"
                     placeholder="Escribe el nombre del curso que quieras agregar a tu horario.">
-            </div>
-            <table class="table table-hover<" id="cursos">
+            </div> -->
+            <table class="table table-hover" id="cursos">
                 <thead>
                     <tr>
                         <th>Nombre del curso</th>

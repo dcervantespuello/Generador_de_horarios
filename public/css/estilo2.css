@@ -31,3 +31,9 @@ h1 {
 #errores {
     display: none;
 }
+
+.sorting,
+.sorting_asc,
+.sorting_desc {
+    text-align: center;
+}

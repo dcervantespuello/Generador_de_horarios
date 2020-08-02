@@ -30,7 +30,7 @@ class CursosController extends Controller
         $semana = CursosController::obtenerSemana();
         
         // Número de iteraciones de la metaheurística
-        $iteraciones = 10000;
+        $iteraciones = 7000;
 
 
 
@@ -137,7 +137,7 @@ class CursosController extends Controller
         {
 
             //PASO 2: PERTURBAR X PARA OBTENER XP
-
+            
 
             while ($iteraciones > 0) {
 
@@ -149,7 +149,7 @@ class CursosController extends Controller
 
                     if (count($elegidos) == 1) 
                     {
-                        $nrc1 = $elegidos[0];
+                        $nrc1 = end($elegidos);
                         break;
                     }
                     else
@@ -349,14 +349,22 @@ class CursosController extends Controller
 
                     }
 
-                    if ($aceptado1 and $aceptado2) {
-                        break;
+                    if (isset($aceptado2)) {
+                        if ($aceptado1 and $aceptado2) {
+                            break;
+                        } else {
+                            continue;
+                        }
                     } else {
-                        continue;
+                        if ($aceptado1) {
+                            break;
+                        } else {
+                            continue;
+                        }
                     }
 
                 }
-
+                
                 // Borramos los NRC viejos de los elegidos
                 foreach ($elegidos as $i => $elegido) {
 
@@ -378,7 +386,10 @@ class CursosController extends Controller
 
                 // Agregamos los NRC nuevos a los elegidos
                 $elegidos[] = $aleatorio1;
-                $elegidos[] = $aleatorio2;
+                
+                if (isset($aleatorio2)) {
+                    $elegidos[] = $aleatorio2;
+                }
 
                 
                 
@@ -438,7 +449,7 @@ class CursosController extends Controller
                     // Actualizamos la semana
                     $semana = $perturbada;
                 }
-
+                
                 // Descontamos una iteración
                 $iteraciones -= 1;
 

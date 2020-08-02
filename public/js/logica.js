@@ -138,16 +138,52 @@ function quitar(nombre, creditos) {
 
 }
 
-// Función del buscador
 $(document).ready(function() {
-    $("#buscador").keyup(function() {
-        _this = this;
-        // Mostrar solamente los TR correctos y ocultar el resto
-        $.each($("#cursos tbody tr"), function() {
-            if ($(this).text().toLowerCase().indexOf($(_this).val().toLowerCase()) === -1)
-                $(this).hide();
-            else
-                $(this).show();
-        });
+    $('#cursos').DataTable({
+        language: idioma_espanol
     });
 });
+
+var idioma_espanol = {
+    "sProcessing": "Procesando...",
+    "sLengthMenu": "Mostrar _MENU_ registros",
+    "sZeroRecords": "No se encontraron resultados",
+    "sEmptyTable": "Ningún dato disponible en esta tabla",
+    "sInfo": "Registros del _START_ al _END_ de _TOTAL_",
+    "sInfoEmpty": "Registros del 0 al 0 de 0",
+    "sInfoFiltered": "(total global: _MAX_)",
+    "sInfoPostFix": "",
+    "sSearch": "Buscar curso:",
+    "sUrl": "",
+    "sInfoThousands": ",",
+    "sLoadingRecords": "Cargando...",
+    "oPaginate": {
+        "sFirst": "Primero",
+        "sLast": "Último",
+        "sNext": "Siguiente",
+        "sPrevious": "Anterior"
+    },
+    "oAria": {
+        "sSortAscending": ": Activar para ordenar la columna de manera ascendente",
+        "sSortDescending": ": Activar para ordenar la columna de manera descendente"
+    },
+    "buttons": {
+        "copy": "Copiar",
+        "colvis": "Visibilidad"
+    }
+}
+
+
+// Función del buscador
+// $(document).ready(function() {
+//     $("#buscador").keyup(function() {
+//         _this = this;
+//         // Mostrar solamente los TR correctos y ocultar el resto
+//         $.each($("#cursos tbody tr"), function() {
+//             if ($(this).text().toLowerCase().indexOf($(_this).val().toLowerCase()) === -1)
+//                 $(this).hide();
+//             else
+//                 $(this).show();
+//         });
+//     });
+// });
