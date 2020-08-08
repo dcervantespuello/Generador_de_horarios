@@ -17,7 +17,6 @@ class CursosController extends Controller
 
     }
 
-
     public function hill_climbing(Request $request)
     {
         // Recibiendo nombres de cursos - OK
@@ -30,7 +29,7 @@ class CursosController extends Controller
         $semana = CursosController::obtenerSemana();
         
         // Número de iteraciones de la metaheurística
-        $iteraciones = 7000;
+        $iteraciones = 500;
 
 
 
@@ -65,21 +64,33 @@ class CursosController extends Controller
                         
                         if ($dia != 'materia' and $dia != 'curso' and $dia != 'seccion' and $dia != 'capacidad' and $dia != 'disponibles' and $dia != 'ocupados' and $dia != 'codigo_docente' and $dia != 'docente' and $dia != 'tipo') {
                             
-                            $hora1 = $cursos[$nombre][$nrc][$dia]['hora1'];
-                            $hora2 = $cursos[$nombre][$nrc][$dia]['hora2'];
-
-                            if (empty($semana[$dia][$hora1]) and empty($semana[$dia][$hora2])) {
+                            $horas = $cursos[$nombre][$nrc][$dia]['horas'];
+                            
+                            foreach ($horas as $hora) {
                                 
-                                $semana[$dia][$hora1] = $nrc;
-                                $semana[$dia][$hora2] = $nrc;
+                                if (empty($semana[$dia][$hora]) or $semana[$dia][$hora] == $nrc) {
+                                    
+                                    $semana[$dia][$hora] = $nrc;
 
+                                    $valido = true;
+
+                                } else {
+                                    $valido = false;
+                                    break;
+                                }
+
+                            }
+                            
+                            if ($valido)
+                            {
                                 if ($dia == $ultimo_dia) {
                                     $aceptado = true;
                                     $elegidos[] = $nrc;
                                     break;
                                 }
-
-                            } else {
+                            }
+                            else
+                            {
                                 
                                 // Se quita el NRC de toda la semana
                                 foreach ($semana as $day => $hours) {
@@ -135,7 +146,7 @@ class CursosController extends Controller
         }
         else
         {
-
+            
             //PASO 2: PERTURBAR X PARA OBTENER XP
             
 
@@ -164,7 +175,7 @@ class CursosController extends Controller
                     }
 
                 }
-
+                
                 // Obteniendo los nombres de los cursos del NRC 1 y NRC 2
                 foreach ($nombres as $nombre) {
 
@@ -218,7 +229,7 @@ class CursosController extends Controller
                 while (true) {
 
                     $aleatorio1 = array_rand(array_flip(array_keys($cursos[$nombre1])));
-
+                    
                     if ($aleatorio1 != 'campus' and $aleatorio1 != 'fecha_inicio' and $aleatorio1 != 'creditos') 
                     {
                         // NRC aceptado
@@ -232,41 +243,46 @@ class CursosController extends Controller
                             
                             if ($dia != 'materia' and $dia != 'curso' and $dia != 'seccion' and $dia != 'capacidad' and $dia != 'disponibles' and $dia != 'ocupados' and $dia != 'codigo_docente' and $dia != 'docente' and $dia != 'tipo') {
                                 
-                                $hora1 = $cursos[$nombre1][$aleatorio1][$dia]['hora1'];
-                                $hora2 = $cursos[$nombre1][$aleatorio1][$dia]['hora2'];
+                                $horas = $cursos[$nombre1][$aleatorio1][$dia]['horas'];
 
-                                if (empty($perturbada[$dia][$hora1]) and empty($perturbada[$dia][$hora2])) {
-                                    
-                                    $perturbada[$dia][$hora1] = $aleatorio1;
-                                    $perturbada[$dia][$hora2] = $aleatorio1;
+                                foreach ($horas as $hora) {
 
+                                    if (empty($perturbada[$dia][$hora]) or $perturbada[$dia][$hora] = $aleatorio1) {
+
+                                        $perturbada[$dia][$hora] = $aleatorio1;
+
+                                        $valido = true;
+
+                                    } else {
+                                        $valido = false;
+                                        break;
+                                    }
+
+                                }
+
+                                if ($valido)
+                                {
                                     if ($dia == $ultimo_dia) {
                                         $aceptado1 = true;
                                         break;
                                     }
-
-                                } else {
-                                    
-                                    // Se quita el NRC de toda la semana perturbada
+                                }
+                                else
+                                {
+                                    // Se quita el NRC de toda la semana
                                     foreach ($perturbada as $day => $hours) {
-
                                         foreach ($hours as $hour => $time) {
-
                                             if ($time == $aleatorio1) {
-
-                                                $perturbada[$day][$hour] = "";
-
+                                                $perturbada[$day][$hour] = '';
                                             }
-
                                         }
-
                                     }
 
                                     break;
                                 }
 
                             }
-                            
+
                         }
 
                         if (!$aceptado1) {
@@ -296,38 +312,39 @@ class CursosController extends Controller
                                 
                                 if ($dia != 'materia' and $dia != 'curso' and $dia != 'seccion' and $dia != 'capacidad' and $dia != 'disponibles' and $dia != 'ocupados' and $dia != 'codigo_docente' and $dia != 'docente' and $dia != 'tipo') {
                                     
-                                    $hora1 = $cursos[$nombre2][$aleatorio2][$dia]['hora1'];
-                                    $hora2 = $cursos[$nombre2][$aleatorio2][$dia]['hora2'];
+                                    $horas = $cursos[$nombre2][$aleatorio2][$dia]['horas'];
 
-                                    if (empty($perturbada[$dia][$hora1]) and empty($perturbada[$dia][$hora2])) {
-                                        
-                                        $perturbada[$dia][$hora1] = $aleatorio2;
-                                        $perturbada[$dia][$hora2] = $aleatorio2;
+                                    foreach ($horas as $hora) {
 
+                                        if (empty($perturbada[$dia][$hora]) or $perturbada[$dia][$hora] = $aleatorio2) {
+
+                                            $perturbada[$dia][$hora] = $aleatorio2;
+
+                                            $valido = true;
+
+                                        } else {
+                                            $valido = false;
+                                            break;
+                                        }
+
+                                    }
+
+                                    if ($valido)
+                                    {
                                         if ($dia == $ultimo_dia) {
                                             $aceptado2 = true;
                                             break;
                                         }
-
-                                    } else {
-                                        
+                                    }
+                                    else
+                                    {
                                         // Se quita el NRC de toda la semana
                                         foreach ($perturbada as $day => $hours) {
-                                            
                                             foreach ($hours as $hour => $time) {
-
                                                 if ($time == $aleatorio2) {
-
-                                                    $perturbada[$day][$hour] = "";
-
-                                                } elseif ($time == $aleatorio1) {
-
-                                                    $perturbada[$day][$hour] = "";
-
+                                                    $perturbada[$day][$hour] = '';
                                                 }
-
                                             }
-
                                         }
 
                                         break;
@@ -483,88 +500,6 @@ class CursosController extends Controller
     }
 
     
-    public function obtenerDia($lun, $mar, $mie, $jue, $vie, $sab, $dom)
-    {
-
-        // Array donde vamos a guardar el nombre del día y las horas
-        $dia = [];
-
-        if($lun) {
-
-            // Sustraemos las horas del texto de la celda
-            $partes = explode('-', $lun);
-            $hora1 = substr($partes[0], 0, 2);
-            $hora2 = substr($partes[1], 0, 2);
-
-            // Guardamos y luego devolvemos
-            $dia = ['lunes', $hora1, $hora2];
-            
-        } elseif($mar) {
-
-            // Sustraemos las horas del texto de la celda
-            $partes = explode('-', $mar);
-            $hora1 = substr($partes[0], 0, 2);
-            $hora2 = substr($partes[1], 0, 2);
-
-            // Guardamos y luego devolvemos
-            $dia = ['martes', $hora1, $hora2];
-            
-        } elseif($mie) {
-
-            // Sustraemos las horas del texto de la celda
-            $partes = explode('-', $mie);
-            $hora1 = substr($partes[0], 0, 2);
-            $hora2 = substr($partes[1], 0, 2);
-
-            // Guardamos y luego devolvemos
-            $dia = ['miercoles', $hora1, $hora2];
-            
-        } elseif($jue) {
-
-            // Sustraemos las horas del texto de la celda
-            $partes = explode('-', $jue);
-            $hora1 = substr($partes[0], 0, 2);
-            $hora2 = substr($partes[1], 0, 2);
-
-            // Guardamos y luego devolvemos
-            $dia = ['jueves', $hora1, $hora2];
-            
-        } elseif($vie) {
-
-            // Sustraemos las horas del texto de la celda
-            $partes = explode('-', $vie);
-            $hora1 = substr($partes[0], 0, 2);
-            $hora2 = substr($partes[1], 0, 2);
-
-            // Guardamos y luego devolvemos
-            $dia = ['viernes', $hora1, $hora2];
-            
-        } elseif($sab) {
-
-            // Sustraemos las horas del texto de la celda
-            $partes = explode('-', $sab);
-            $hora1 = substr($partes[0], 0, 2);
-            $hora2 = substr($partes[1], 0, 2);
-
-            // Guardamos y luego devolvemos
-            $dia = ['sabado', $hora1, $hora2];
-            
-        } elseif($dom) {
-
-            // Sustraemos las horas del texto de la celda
-            $partes = explode('-', $dom);
-            $hora1 = substr($partes[0], 0, 2);
-            $hora2 = substr($partes[1], 0, 2);
-
-            // Guardamos y luego devolvemos
-            $dia = ['domingo', $hora1, $hora2];
-            
-        }
-
-        return $dia;
-    }
-
-
     public function obtenerCursos() 
     {
         // 1. Inicializamos el array donde se va a organizar la información
@@ -625,16 +560,28 @@ class CursosController extends Controller
                     $hrs_sem = intval($subcadena);
 
                     // 11. Obtenemos el día de la semana que tiene la hora de clase
-                    $dia = CursosController::obtenerDia($dato->Lunes, $dato->Martes, $dato->Miercoles, $dato->Jueves, $dato->Viernes, $dato->Sabado, $dato->Domingo);
+                    $dias = CursosController::obtenerDia($dato->Lunes, $dato->Martes, $dato->Miercoles, $dato->Jueves, $dato->Viernes, $dato->Sabado, $dato->Domingo);
                     
                     // 12. Agregamos la información en el array de cursos
-                    $cursos[$nombre][$nrc][$dia[0]] = [
-                        'hora1' => $dia[1],
-                        'hora2' => $dia[2],
-                        'edificio' => $dato->Edf,
-                        'salon' => $dato->Salon,
-                        'semanales' => $hrs_sem
-                    ];
+                    foreach ($dias as $i => $val) {
+
+                        if (isset($cursos[$nombre][$nrc][$dias[$i][0]])) 
+                        {
+                            $cursos[$nombre][$nrc][$dias[$i][0]]['horas'][] = $dias[$i][1];
+                            $cursos[$nombre][$nrc][$dias[$i][0]]['horas'][] = $dias[$i][2];
+
+                        }
+                        else
+                        {
+                            $cursos[$nombre][$nrc][$dias[$i][0]] = [
+                                'horas' => [$dias[$i][1], $dias[$i][2]],
+                                'edificio' => $dato->Edf,
+                                'salon' => $dato->Salon,
+                                'semanales' => $hrs_sem
+                            ];   
+                        }
+
+                    }
 
                 }
 
@@ -644,6 +591,100 @@ class CursosController extends Controller
 
         return $cursos;
 
+    }
+
+
+    public function obtenerDia($lun, $mar, $mie, $jue, $vie, $sab, $dom)
+    {
+
+        // Array donde vamos a guardar el nombre del día y las horas
+        $dias = [];
+
+        if($lun) {
+
+            // Sustraemos las horas del texto de la celda
+            $partes = explode('-', $lun);
+            $hora1 = substr($partes[0], 0, 2);
+            $hora2 = substr($partes[1], 0, 2);
+
+            // Guardamos y luego devolvemos
+            $dias[] = ['lunes', $hora1, $hora2];
+            
+        } 
+        
+        if($mar) {
+
+            // Sustraemos las horas del texto de la celda
+            $partes = explode('-', $mar);
+            $hora1 = substr($partes[0], 0, 2);
+            $hora2 = substr($partes[1], 0, 2);
+
+            // Guardamos y luego devolvemos
+            $dias[] = ['martes', $hora1, $hora2];
+            
+        }
+        
+        if($mie) {
+
+            // Sustraemos las horas del texto de la celda
+            $partes = explode('-', $mie);
+            $hora1 = substr($partes[0], 0, 2);
+            $hora2 = substr($partes[1], 0, 2);
+
+            // Guardamos y luego devolvemos
+            $dias[] = ['miercoles', $hora1, $hora2];
+            
+        }
+        
+        if($jue) {
+
+            // Sustraemos las horas del texto de la celda
+            $partes = explode('-', $jue);
+            $hora1 = substr($partes[0], 0, 2);
+            $hora2 = substr($partes[1], 0, 2);
+
+            // Guardamos y luego devolvemos
+            $dias[] = ['jueves', $hora1, $hora2];
+            
+        }
+        
+        if($vie) {
+
+            // Sustraemos las horas del texto de la celda
+            $partes = explode('-', $vie);
+            $hora1 = substr($partes[0], 0, 2);
+            $hora2 = substr($partes[1], 0, 2);
+
+            // Guardamos y luego devolvemos
+            $dias[] = ['viernes', $hora1, $hora2];
+            
+        }
+        
+        if($sab) {
+
+            // Sustraemos las horas del texto de la celda
+            $partes = explode('-', $sab);
+            $hora1 = substr($partes[0], 0, 2);
+            $hora2 = substr($partes[1], 0, 2);
+
+            // Guardamos y luego devolvemos
+            $dias[] = ['sabado', $hora1, $hora2];
+            
+        }
+        
+        if($dom) {
+
+            // Sustraemos las horas del texto de la celda
+            $partes = explode('-', $dom);
+            $hora1 = substr($partes[0], 0, 2);
+            $hora2 = substr($partes[1], 0, 2);
+
+            // Guardamos y luego devolvemos
+            $dias[] = ['domingo', $hora1, $hora2];
+            
+        }
+        
+        return $dias;
     }
 
 
