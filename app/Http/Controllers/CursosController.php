@@ -65,18 +65,45 @@ class CursosController extends Controller
                         if ($dia != 'materia' and $dia != 'curso' and $dia != 'seccion' and $dia != 'capacidad' and $dia != 'disponibles' and $dia != 'ocupados' and $dia != 'codigo_docente' and $dia != 'docente' and $dia != 'tipo') {
                             
                             $horas = $cursos[$nombre][$nrc][$dia]['horas'];
-                            
-                            foreach ($horas as $hora) {
-                                
-                                if (empty($semana[$dia][$hora]) or $semana[$dia][$hora] == $nrc) {
-                                    
-                                    $semana[$dia][$hora] = $nrc;
 
-                                    $valido = true;
+                            for ($i = 1; $i <= count($horas); $i++) {
+
+                                if ($i % 2 != 0) {
+
+                                    $inicio = $i - 1;
+                                    continue;
 
                                 } else {
-                                    $valido = false;
-                                    break;
+
+                                    $final = $i - 1;
+                                    
+                                    for ($j = $horas[$inicio]; $j <= $horas[$final]; $j++) {
+
+                                        if (empty($semana[$dia][$j]) or $semana[$dia][$j] == $nrc) {
+                                            
+                                            $semana[$dia][$j] = $nrc;
+        
+                                            $valido = true;
+        
+                                        } else {
+        
+                                            $valido = false;
+                                            break;
+        
+                                        }
+        
+                                    }
+
+                                    if ($valido) {
+
+                                        continue;
+
+                                    } else {
+
+                                        break;
+
+                                    }
+
                                 }
 
                             }
@@ -123,7 +150,7 @@ class CursosController extends Controller
         }
         
         // Devolver al estudiante a la selección de cursos si alguno se cruza
-        if ($cruzados) 
+        if ($cruzados)
         {
             $error = "Los NRC de los siguientes cursos se cruzan: ";
 
@@ -245,17 +272,44 @@ class CursosController extends Controller
                                 
                                 $horas = $cursos[$nombre1][$aleatorio1][$dia]['horas'];
 
-                                foreach ($horas as $hora) {
+                                for ($i = 1; $i <= count($horas); $i++) {
 
-                                    if (empty($perturbada[$dia][$hora]) or $perturbada[$dia][$hora] = $aleatorio1) {
+                                    if ($i % 2 != 0) {
 
-                                        $perturbada[$dia][$hora] = $aleatorio1;
-
-                                        $valido = true;
+                                        $inicio = $i - 1;
+                                        continue;
 
                                     } else {
-                                        $valido = false;
-                                        break;
+
+                                        $final = $i - 1;
+                                        
+                                        for ($j = $horas[$inicio]; $j <= $horas[$final]; $j++) {
+
+                                            if (empty($perturbada[$dia][$j]) or $perturbada[$dia][$j] == $aleatorio1) {
+                                                
+                                                $perturbada[$dia][$j] = $aleatorio1;
+            
+                                                $valido = true;
+            
+                                            } else {
+            
+                                                $valido = false;
+                                                break;
+            
+                                            }
+            
+                                        }
+
+                                        if ($valido) {
+
+                                            continue;
+
+                                        } else {
+
+                                            break;
+
+                                        }
+
                                     }
 
                                 }
@@ -314,19 +368,46 @@ class CursosController extends Controller
                                     
                                     $horas = $cursos[$nombre2][$aleatorio2][$dia]['horas'];
 
-                                    foreach ($horas as $hora) {
-
-                                        if (empty($perturbada[$dia][$hora]) or $perturbada[$dia][$hora] = $aleatorio2) {
-
-                                            $perturbada[$dia][$hora] = $aleatorio2;
-
-                                            $valido = true;
-
+                                    for ($i = 1; $i <= count($horas); $i++) {
+    
+                                        if ($i % 2 != 0) {
+    
+                                            $inicio = $i - 1;
+                                            continue;
+    
                                         } else {
-                                            $valido = false;
-                                            break;
+    
+                                            $final = $i - 1;
+                                            
+                                            for ($j = $horas[$inicio]; $j <= $horas[$final]; $j++) {
+    
+                                                if (empty($perturbada[$dia][$j]) or $perturbada[$dia][$j] == $aleatorio2) {
+                                                    
+                                                    $perturbada[$dia][$j] = $aleatorio2;
+                
+                                                    $valido = true;
+                
+                                                } else {
+                
+                                                    $valido = false;
+                                                    break;
+                
+                                                }
+                
+                                            }
+    
+                                            if ($valido) {
+    
+                                                continue;
+    
+                                            } else {
+    
+                                                break;
+    
+                                            }
+    
                                         }
-
+    
                                     }
 
                                     if ($valido)
@@ -479,15 +560,7 @@ class CursosController extends Controller
 
                 foreach ($semana as $dia => $horas) {
                  
-                    if ($i < 10) {
-
-                        $filas[$i][] = $semana[$dia]["0".$i];
-
-                    } else {
-
-                        $filas[$i][] = $semana[$dia][$i];
-
-                    }
+                    $filas[$i][] = $semana[$dia][$i];
 
                 }
 
@@ -565,7 +638,7 @@ class CursosController extends Controller
                     // 12. Agregamos la información en el array de cursos
                     foreach ($dias as $i => $val) {
 
-                        if (isset($cursos[$nombre][$nrc][$dias[$i][0]])) 
+                        if (isset($cursos[$nombre][$nrc][$dias[$i][0]]))
                         {
                             $cursos[$nombre][$nrc][$dias[$i][0]]['horas'][] = $dias[$i][1];
                             $cursos[$nombre][$nrc][$dias[$i][0]]['horas'][] = $dias[$i][2];
@@ -604,9 +677,31 @@ class CursosController extends Controller
 
             // Sustraemos las horas del texto de la celda
             $partes = explode('-', $lun);
-            $hora1 = substr($partes[0], 0, 2);
-            $hora2 = substr($partes[1], 0, 2);
+            
+            $parte1 = substr($partes[0], 0, 2);
+            
+            if ($parte1[0] == 0) {
 
+                $hora1 = $parte1[1];
+
+            } else {
+
+                $hora1 = $parte1;
+
+            }
+
+            $parte2 = substr($partes[1], 0, 2);
+
+            if ($parte2[0] == 0) {
+
+                $hora2 = $parte2[1];
+
+            } else {
+
+                $hora2 = $parte2;
+
+            }
+            
             // Guardamos y luego devolvemos
             $dias[] = ['lunes', $hora1, $hora2];
             
@@ -616,8 +711,30 @@ class CursosController extends Controller
 
             // Sustraemos las horas del texto de la celda
             $partes = explode('-', $mar);
-            $hora1 = substr($partes[0], 0, 2);
-            $hora2 = substr($partes[1], 0, 2);
+            
+            $parte1 = substr($partes[0], 0, 2);
+            
+            if ($parte1[0] == 0) {
+
+                $hora1 = $parte1[1];
+
+            } else {
+
+                $hora1 = $parte1;
+
+            }
+
+            $parte2 = substr($partes[1], 0, 2);
+
+            if ($parte2[0] == 0) {
+
+                $hora2 = $parte2[1];
+
+            } else {
+
+                $hora2 = $parte2;
+
+            }
 
             // Guardamos y luego devolvemos
             $dias[] = ['martes', $hora1, $hora2];
@@ -628,8 +745,30 @@ class CursosController extends Controller
 
             // Sustraemos las horas del texto de la celda
             $partes = explode('-', $mie);
-            $hora1 = substr($partes[0], 0, 2);
-            $hora2 = substr($partes[1], 0, 2);
+            
+            $parte1 = substr($partes[0], 0, 2);
+            
+            if ($parte1[0] == 0) {
+
+                $hora1 = $parte1[1];
+
+            } else {
+
+                $hora1 = $parte1;
+
+            }
+
+            $parte2 = substr($partes[1], 0, 2);
+
+            if ($parte2[0] == 0) {
+
+                $hora2 = $parte2[1];
+
+            } else {
+
+                $hora2 = $parte2;
+
+            }
 
             // Guardamos y luego devolvemos
             $dias[] = ['miercoles', $hora1, $hora2];
@@ -640,8 +779,30 @@ class CursosController extends Controller
 
             // Sustraemos las horas del texto de la celda
             $partes = explode('-', $jue);
-            $hora1 = substr($partes[0], 0, 2);
-            $hora2 = substr($partes[1], 0, 2);
+            
+            $parte1 = substr($partes[0], 0, 2);
+            
+            if ($parte1[0] == 0) {
+
+                $hora1 = $parte1[1];
+
+            } else {
+
+                $hora1 = $parte1;
+
+            }
+
+            $parte2 = substr($partes[1], 0, 2);
+
+            if ($parte2[0] == 0) {
+
+                $hora2 = $parte2[1];
+
+            } else {
+
+                $hora2 = $parte2;
+
+            }
 
             // Guardamos y luego devolvemos
             $dias[] = ['jueves', $hora1, $hora2];
@@ -652,8 +813,30 @@ class CursosController extends Controller
 
             // Sustraemos las horas del texto de la celda
             $partes = explode('-', $vie);
-            $hora1 = substr($partes[0], 0, 2);
-            $hora2 = substr($partes[1], 0, 2);
+            
+            $parte1 = substr($partes[0], 0, 2);
+            
+            if ($parte1[0] == 0) {
+
+                $hora1 = $parte1[1];
+
+            } else {
+
+                $hora1 = $parte1;
+
+            }
+
+            $parte2 = substr($partes[1], 0, 2);
+
+            if ($parte2[0] == 0) {
+
+                $hora2 = $parte2[1];
+
+            } else {
+
+                $hora2 = $parte2;
+
+            }
 
             // Guardamos y luego devolvemos
             $dias[] = ['viernes', $hora1, $hora2];
@@ -664,8 +847,30 @@ class CursosController extends Controller
 
             // Sustraemos las horas del texto de la celda
             $partes = explode('-', $sab);
-            $hora1 = substr($partes[0], 0, 2);
-            $hora2 = substr($partes[1], 0, 2);
+            
+            $parte1 = substr($partes[0], 0, 2);
+            
+            if ($parte1[0] == 0) {
+
+                $hora1 = $parte1[1];
+
+            } else {
+
+                $hora1 = $parte1;
+
+            }
+
+            $parte2 = substr($partes[1], 0, 2);
+
+            if ($parte2[0] == 0) {
+
+                $hora2 = $parte2[1];
+
+            } else {
+
+                $hora2 = $parte2;
+
+            }
 
             // Guardamos y luego devolvemos
             $dias[] = ['sabado', $hora1, $hora2];
@@ -676,8 +881,30 @@ class CursosController extends Controller
 
             // Sustraemos las horas del texto de la celda
             $partes = explode('-', $dom);
-            $hora1 = substr($partes[0], 0, 2);
-            $hora2 = substr($partes[1], 0, 2);
+            
+            $parte1 = substr($partes[0], 0, 2);
+            
+            if ($parte1[0] == 0) {
+
+                $hora1 = $parte1[1];
+
+            } else {
+
+                $hora1 = $parte1;
+
+            }
+
+            $parte2 = substr($partes[1], 0, 2);
+
+            if ($parte2[0] == 0) {
+
+                $hora2 = $parte2[1];
+
+            } else {
+
+                $hora2 = $parte2;
+
+            }
 
             // Guardamos y luego devolvemos
             $dias[] = ['domingo', $hora1, $hora2];
@@ -692,13 +919,13 @@ class CursosController extends Controller
     {
         $semana = [
             
-            'lunes' => ['07' => '', '08' => '', '09' => '', '10' => '', '11' => '', '12' => '', '13' => '', '14' => '', '15' => '', '16' => '', '17' => '', '18' => '', '19' => '', '20' => ''],
-            'martes' => ['07' => '', '08' => '', '09' => '', '10' => '', '11' => '', '12' => '', '13' => '', '14' => '', '15' => '', '16' => '', '17' => '', '18' => '', '19' => '', '20' => ''],
-            'miercoles' => ['07' => '', '08' => '', '09' => '', '10' => '', '11' => '', '12' => '', '13' => '', '14' => '', '15' => '', '16' => '', '17' => '', '18' => '', '19' => '', '20' => ''],
-            'jueves' => ['07' => '', '08' => '', '09' => '', '10' => '', '11' => '', '12' => '', '13' => '', '14' => '', '15' => '', '16' => '', '17' => '', '18' => '', '19' => '', '20' => ''],
-            'viernes' => ['07' => '', '08' => '', '09' => '', '10' => '', '11' => '', '12' => '', '13' => '', '14' => '', '15' => '', '16' => '', '17' => '', '18' => '', '19' => '', '20' => ''],
-            'sabado' => ['07' => '', '08' => '', '09' => '', '10' => '', '11' => '', '12' => '', '13' => '', '14' => '', '15' => '', '16' => '', '17' => '', '18' => '', '19' => '', '20' => ''],
-            'domingo' => ['07' => '', '08' => '', '09' => '', '10' => '', '11' => '', '12' => '', '13' => '', '14' => '', '15' => '', '16' => '', '17' => '', '18' => '', '19' => '', '20' => '']
+            'lunes' => ['7' => '', '8' => '', '9' => '', '10' => '', '11' => '', '12' => '', '13' => '', '14' => '', '15' => '', '16' => '', '17' => '', '18' => '', '19' => '', '20' => ''],
+            'martes' => ['7' => '', '8' => '', '9' => '', '10' => '', '11' => '', '12' => '', '13' => '', '14' => '', '15' => '', '16' => '', '17' => '', '18' => '', '19' => '', '20' => ''],
+            'miercoles' => ['7' => '', '8' => '', '9' => '', '10' => '', '11' => '', '12' => '', '13' => '', '14' => '', '15' => '', '16' => '', '17' => '', '18' => '', '19' => '', '20' => ''],
+            'jueves' => ['7' => '', '8' => '', '9' => '', '10' => '', '11' => '', '12' => '', '13' => '', '14' => '', '15' => '', '16' => '', '17' => '', '18' => '', '19' => '', '20' => ''],
+            'viernes' => ['7' => '', '8' => '', '9' => '', '10' => '', '11' => '', '12' => '', '13' => '', '14' => '', '15' => '', '16' => '', '17' => '', '18' => '', '19' => '', '20' => ''],
+            'sabado' => ['7' => '', '8' => '', '9' => '', '10' => '', '11' => '', '12' => '', '13' => '', '14' => '', '15' => '', '16' => '', '17' => '', '18' => '', '19' => '', '20' => ''],
+            'domingo' => ['7' => '', '8' => '', '9' => '', '10' => '', '11' => '', '12' => '', '13' => '', '14' => '', '15' => '', '16' => '', '17' => '', '18' => '', '19' => '', '20' => '']
             
         ];
 
