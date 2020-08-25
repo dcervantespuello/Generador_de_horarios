@@ -352,7 +352,7 @@ class CursosController extends Controller
                     if (isset($nombre2))
                     {
                         $aleatorio2 = array_rand(array_flip(array_keys($cursos[$nombre2])));
-
+                        
                         if ($aleatorio2 != 'campus' and $aleatorio2 != 'fecha_inicio' and $aleatorio2 != 'creditos') 
                         {
                             // NRC aceptado
@@ -553,6 +553,30 @@ class CursosController extends Controller
 
 
             }
+
+            
+            // Agregando los nombres de los cursos
+
+            $definitivos = [];
+
+            foreach ($semana as $dia => $horas) 
+            {
+                foreach ($horas as $hora => $nrc) 
+                {    
+                    if (!empty($nrc) and !in_array($nrc, $definitivos))
+                    {
+                        $name = DB::select('select * from cursos where Nrc = "'.$nrc.'" limit 1');
+                        $name = $name[0]->Nombre_asignatura;
+
+                        $definitivos[$nrc] = $name;
+                    }
+
+                }
+
+            }
+            
+
+            // Ordenando para mostrar horario generado
             
             $filas = [];
 
@@ -565,8 +589,8 @@ class CursosController extends Controller
                 }
 
             }
-
-            return view('resultado', ['semana' => $semana, 'cursos' => $cursos, 'nombres' => $nombres, 'elegidos' => $elegidos, 'filas' => $filas]);
+            
+            return view('resultado', ['cursos' => $cursos, 'filas' => $filas, 'definitivos' => $definitivos]);
 
         }
 

@@ -15,7 +15,7 @@
     <link rel="stylesheet" type="text/css" href="{{ asset('css/normalize.css') }}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.1.3/css/bootstrap.css">
     <link rel="stylesheet" href="https://cdn.datatables.net/1.10.21/css/dataTables.bootstrap4.min.css">
-    <link rel="stylesheet" type="text/css" href="{{ asset('css/estilo2.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ asset('css/estilo.css') }}">
 
     <title>HORARIOS UTB</title>
 </head>

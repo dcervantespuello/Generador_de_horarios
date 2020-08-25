@@ -11,7 +11,7 @@
     </div>
     <div class="row">
         <div class="col">
-            <table class="table table-bordered">
+            <table class="table table-bordered table-sm" id="generado">
                 <thead>
                     <tr>
                         <th>Hora</th>
@@ -27,9 +27,15 @@
                 <tbody>
                     @foreach ($filas as $fila => $dias)
                     <tr>
-                        <td>{{ $fila }}:00 - {{ $fila }}:50</td>
+                        <td style="white-space:nowrap;">{{ $fila }}:00 - {{ $fila }}:50</td>
                         @foreach ($dias as $hora => $nrc)
-                        <td>{{ $nrc }}</td>
+
+                            @if(empty($nrc))
+                            <td></td>
+                            @else
+                            <td>{{ $definitivos[$nrc] }} ({{ $nrc }})</td>
+                            @endif
+
                         @endforeach
                     </tr>
                     @endforeach
