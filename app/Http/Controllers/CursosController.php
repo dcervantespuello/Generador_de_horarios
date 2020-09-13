@@ -320,47 +320,67 @@ class CursosController extends Controller
                     if (count($elegidos) == 1) 
                     {
                         $nrc1 = end($elegidos);
+
+                        // Obteniendo los nombres de los cursos del NRC 1 y NRC 2
+                        foreach ($nombres as $nombre) {
+
+                            foreach ($cursos[$nombre] as $nrc => $val1) {
+
+                                if ($nrc != 'campus' and $nrc != 'fecha_inicio' and $nrc != 'creditos') {
+                                    
+                                    if ($nrc == $nrc1) 
+                                    {
+                                        $nombre1 = $nombre;
+                                    } 
+                                }
+                            }
+                        }
+
                         break;
                     }
                     else
                     {
-                        $nrc1 = array_rand(array_flip($elegidos));
-                        $nrc2 = array_rand(array_flip($elegidos));
-                        
-                        if ($nrc1 != $nrc2) {
-                            break;
-                        }
+                        while (true) 
+                        {
+                            $nrc1 = array_rand(array_flip($elegidos));
+                            $nrc2 = array_rand(array_flip($elegidos));
 
-                    }
-
-                }
-                
-                // Obteniendo los nombres de los cursos del NRC 1 y NRC 2
-                foreach ($nombres as $nombre) {
-
-                    foreach ($cursos[$nombre] as $nrc => $val1) {
-
-                        if ($nrc != 'campus' and $nrc != 'fecha_inicio' and $nrc != 'creditos') {
-                            
-                            if ($nrc == $nrc1) 
+                            if ($nrc1 == $nrc2)
                             {
-                                $nombre1 = $nombre;
-                            } 
-                            elseif (isset($nrc2))
-                            {
-                                if ($nrc == $nrc2) 
-                                {
-                                    $nombre2 = $nombre;
-                                }
-
+                                continue;
                             }
 
+                            // Obteniendo los nombres de los cursos del NRC 1 y NRC 2
+                            foreach ($nombres as $nombre) {
+
+                                foreach ($cursos[$nombre] as $nrc => $val1) {
+
+                                    if ($nrc != 'campus' and $nrc != 'fecha_inicio' and $nrc != 'creditos') {
+                                        
+                                        if ($nrc == $nrc1) 
+                                        {
+                                            $nombre1 = $nombre;
+                                        } 
+                                        elseif ($nrc == $nrc2)
+                                        {
+                                            $nombre2 = $nombre;
+                                        }
+                                    }
+                                }
+                            }
+
+                            // Comprobando si los NRC elegidos son de laboratorios
+                            $seccion1 = $cursos[$nombre1][$nrc1]['seccion'];
+                            $seccion2 = $cursos[$nombre2][$nrc2]['seccion'];
+
+                            if ((substr($seccion1, -1) != "1" and substr($seccion1, -1) != "2") and (substr($seccion2, -1) != "1" and substr($seccion2, -1) != "2")) 
+                            {
+                                break;
+                            }
                         }
-
                     }
-
                 }
-                
+                dd($nrc1, $elegidos);
                 // Se quitan los NRC 1 y 2 de toda la semana perturbada
                 foreach ($perturbada as $day => $hours) {
 
