@@ -278,6 +278,21 @@ class CursosController extends Controller
 
                     if (count($elegidos) == 1) {
                         $nrc1 = end($elegidos);
+
+                        // Obteniendo los nombres de los cursos del NRC 1 y NRC 2
+                        foreach ($nombres as $nombre) {
+
+                            foreach ($cursos[$nombre] as $nrc => $val1) {
+
+                                if ($nrc != 'campus' and $nrc != 'fecha_inicio' and $nrc != 'creditos') {
+
+                                    if ($nrc == $nrc1) {
+                                        $nombre1 = $nombre;
+                                    }
+                                }
+                            }
+                        }
+
                         break;
                     } else {
                         $nrc1 = array_rand(array_flip($elegidos));
