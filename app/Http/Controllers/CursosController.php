@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\CursosController;
+use PhpParser\Node\Stmt\Foreach_;
 
 class CursosController extends Controller
 {
@@ -79,16 +80,16 @@ class CursosController extends Controller
 					$subcadena = substr($texto_malo, 0, 1);
 					$hrs_sem = intval($subcadena);
 
+					$fechas['lunes'] = $dato->Lunes;
+					$fechas['martes'] = $dato->Martes;
+					$fechas['miercoles'] = $dato->Miercoles;
+					$fechas['jueves'] = $dato->Jueves;
+					$fechas['viernes'] = $dato->Viernes;
+					$fechas['sabado'] = $dato->Sabado;
+					$fechas['domingo'] = $dato->Domingo;
+
 					// 11. Obtenemos el día de la semana que tiene la hora de clase
-					$dias = CursosController::obtenerDia(
-						$dato->Lunes,
-						$dato->Martes,
-						$dato->Miercoles,
-						$dato->Jueves,
-						$dato->Viernes,
-						$dato->Sabado,
-						$dato->Domingo
-					);
+					$dias = CursosController::obtenerDia($fechas);
 
 					// 12. Agregamos la información en el array de cursos
 					foreach ($dias as $i => $val) {
@@ -147,7 +148,7 @@ class CursosController extends Controller
 	}
 
 
-	public function obtenerDia($lun, $mar, $mie, $jue, $vie, $sab, $dom)
+	public function obtenerDia($fechas)
 	{
 		/* 
 			* Array donde vamos a guardar el nombre del día, la hora1 y la hora2.
@@ -156,46 +157,53 @@ class CursosController extends Controller
 		*/
 		$dias = [];
 
-		if ($lun) {
-
-			$horas = CursosController::romperHoras($lun);
-			$dias[] = ['lunes', $horas['hora1'], $horas['hora2']];
+		foreach ($fechas as $dia => $horas_unidas) {
+			if ($horas_unidas) {
+				$horas = CursosController::romperHoras($horas_unidas);
+				$dias[] = [$dia, $horas['hora1'], $horas['hora2']];
+			}
 		}
 
-		if ($mar) {
+		// if ($lun) {
 
-			$horas = CursosController::romperHoras($mar);
-			$dias[] = ['martes', $horas['hora1'], $horas['hora2']];
-		}
+		// 	$horas = CursosController::romperHoras($lun);
+		// 	$dias[] = ['lunes', $horas['hora1'], $horas['hora2']];
+		// }
 
-		if ($mie) {
+		// if ($mar) {
 
-			$horas = CursosController::romperHoras($mie);
-			$dias[] = ['miercoles', $horas['hora1'], $horas['hora2']];
-		}
+		// 	$horas = CursosController::romperHoras($mar);
+		// 	$dias[] = ['martes', $horas['hora1'], $horas['hora2']];
+		// }
 
-		if ($jue) {
+		// if ($mie) {
 
-			$horas = CursosController::romperHoras($jue);
-			$dias[] = ['jueves', $horas['hora1'], $horas['hora2']];
-		}
+		// 	$horas = CursosController::romperHoras($mie);
+		// 	$dias[] = ['miercoles', $horas['hora1'], $horas['hora2']];
+		// }
 
-		if ($vie) {
+		// if ($jue) {
 
-			$horas = CursosController::romperHoras($vie);
-			$dias[] = ['viernes', $horas['hora1'], $horas['hora2']];
-		}
+		// 	$horas = CursosController::romperHoras($jue);
+		// 	$dias[] = ['jueves', $horas['hora1'], $horas['hora2']];
+		// }
 
-		if ($sab) {
+		// if ($vie) {
 
-			$horas = CursosController::romperHoras($sab);
-			$dias[] = ['sabado', $horas['hora1'], $horas['hora2']];
-		}
+		// 	$horas = CursosController::romperHoras($vie);
+		// 	$dias[] = ['viernes', $horas['hora1'], $horas['hora2']];
+		// }
 
-		if ($dom) {
-			$horas = CursosController::romperHoras($dom);
-			$dias[] = ['domingo', $horas['hora1'], $horas['hora2']];
-		}
+		// if ($sab) {
+
+		// 	$horas = CursosController::romperHoras($sab);
+		// 	$dias[] = ['sabado', $horas['hora1'], $horas['hora2']];
+		// }
+
+		// if ($dom) {
+		// 	$horas = CursosController::romperHoras($dom);
+		// 	$dias[] = ['domingo', $horas['hora1'], $horas['hora2']];
+		// }
 
 		return $dias;
 	}
@@ -273,7 +281,7 @@ class CursosController extends Controller
 		$cruzados = [];
 		$elegidos = [];
 		$elegidos_labs = [];
-		dd($cursos['FUNDAMENTOS DE ADMINISTRACION']);
+		dd($cursos['PRACTICAS PROFESIONALES']);
 		foreach ($nombres as $nombre) {
 
 			foreach ($laboratorios as $curso) {
