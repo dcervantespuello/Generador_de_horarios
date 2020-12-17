@@ -149,231 +149,54 @@ class CursosController extends Controller
 
 	public function obtenerDia($lun, $mar, $mie, $jue, $vie, $sab, $dom)
 	{
-
 		/* 
-			* Array donde vamos a guardar el nombre del día y las horas.
-			* Los días en una de las filas de un NRC pueden ser varios,
+			* Array donde vamos a guardar el nombre del día, la hora1 y la hora2.
+			* En una de las filas de un NRC pueden haber varios días,
 			* por ejemplo, en una fila puede haber hora el lunes y el martes.
 		*/
 		$dias = [];
 
 		if ($lun) {
 
-			// // Sustraemos las horas del texto de la celda
-			// $partes = explode('-', $lun);
-
-			// $parte1 = substr($partes[0], 0, 2);
-
-			// if ($parte1[0] == 0) {
-
-			// 	$hora1 = $parte1[1];
-			// } else {
-
-			// 	$hora1 = $parte1;
-			// }
-
-			// $parte2 = substr($partes[1], 0, 2);
-
-			// if ($parte2[0] == 0) {
-
-			// 	$hora2 = $parte2[1];
-			// } else {
-
-			// 	$hora2 = $parte2;
-			// }
-
 			$horas = CursosController::romperHoras($lun);
-
-			// Guardamos y luego devolvemos
 			$dias[] = ['lunes', $horas['hora1'], $horas['hora2']];
 		}
 
 		if ($mar) {
 
-			// // Sustraemos las horas del texto de la celda
-			// $partes = explode('-', $mar);
-
-			// $parte1 = substr($partes[0], 0, 2);
-
-			// if ($parte1[0] == 0) {
-
-			// 	$hora1 = $parte1[1];
-			// } else {
-
-			// 	$hora1 = $parte1;
-			// }
-
-			// $parte2 = substr($partes[1], 0, 2);
-
-			// if ($parte2[0] == 0) {
-
-			// 	$hora2 = $parte2[1];
-			// } else {
-
-			// 	$hora2 = $parte2;
-			// }
-
 			$horas = CursosController::romperHoras($mar);
-
-			// Guardamos y luego devolvemos
 			$dias[] = ['martes', $horas['hora1'], $horas['hora2']];
 		}
 
 		if ($mie) {
 
-			// // Sustraemos las horas del texto de la celda
-			// $partes = explode('-', $mie);
-
-			// $parte1 = substr($partes[0], 0, 2);
-
-			// if ($parte1[0] == 0) {
-
-			// 	$hora1 = $parte1[1];
-			// } else {
-
-			// 	$hora1 = $parte1;
-			// }
-
-			// $parte2 = substr($partes[1], 0, 2);
-
-			// if ($parte2[0] == 0) {
-
-			// 	$hora2 = $parte2[1];
-			// } else {
-
-			// 	$hora2 = $parte2;
-			// }
-
 			$horas = CursosController::romperHoras($mie);
-
-			// Guardamos y luego devolvemos
 			$dias[] = ['miercoles', $horas['hora1'], $horas['hora2']];
 		}
 
 		if ($jue) {
 
-			// // Sustraemos las horas del texto de la celda
-			// $partes = explode('-', $jue);
-
-			// $parte1 = substr($partes[0], 0, 2);
-
-			// if ($parte1[0] == 0) {
-
-			// 	$hora1 = $parte1[1];
-			// } else {
-
-			// 	$hora1 = $parte1;
-			// }
-
-			// $parte2 = substr($partes[1], 0, 2);
-
-			// if ($parte2[0] == 0) {
-
-			// 	$hora2 = $parte2[1];
-			// } else {
-
-			// 	$hora2 = $parte2;
-			// }
-
 			$horas = CursosController::romperHoras($jue);
-
-			// Guardamos y luego devolvemos
 			$dias[] = ['jueves', $horas['hora1'], $horas['hora2']];
 		}
 
 		if ($vie) {
 
-			// // Sustraemos las horas del texto de la celda
-			// $partes = explode('-', $vie);
-
-			// $parte1 = substr($partes[0], 0, 2);
-
-			// if ($parte1[0] == 0) {
-
-			// 	$hora1 = $parte1[1];
-			// } else {
-
-			// 	$hora1 = $parte1;
-			// }
-
-			// $parte2 = substr($partes[1], 0, 2);
-
-			// if ($parte2[0] == 0) {
-
-			// 	$hora2 = $parte2[1];
-			// } else {
-
-			// 	$hora2 = $parte2;
-			// }
-
 			$horas = CursosController::romperHoras($vie);
-
-			// Guardamos y luego devolvemos
 			$dias[] = ['viernes', $horas['hora1'], $horas['hora2']];
 		}
 
 		if ($sab) {
 
-			// // Sustraemos las horas del texto de la celda
-			// $partes = explode('-', $sab);
-
-			// $parte1 = substr($partes[0], 0, 2);
-
-			// if ($parte1[0] == 0) {
-
-			// 	$hora1 = $parte1[1];
-			// } else {
-
-			// 	$hora1 = $parte1;
-			// }
-
-			// $parte2 = substr($partes[1], 0, 2);
-
-			// if ($parte2[0] == 0) {
-
-			// 	$hora2 = $parte2[1];
-			// } else {
-
-			// 	$hora2 = $parte2;
-			// }
-
 			$horas = CursosController::romperHoras($sab);
-
-			// Guardamos y luego devolvemos
 			$dias[] = ['sabado', $horas['hora1'], $horas['hora2']];
 		}
 
 		if ($dom) {
-
-			// // Sustraemos las horas del texto de la celda
-			// $partes = explode('-', $dom);
-
-			// $parte1 = substr($partes[0], 0, 2);
-
-			// if ($parte1[0] == 0) {
-
-			// 	$hora1 = $parte1[1];
-			// } else {
-
-			// 	$hora1 = $parte1;
-			// }
-
-			// $parte2 = substr($partes[1], 0, 2);
-
-			// if ($parte2[0] == 0) {
-
-			// 	$hora2 = $parte2[1];
-			// } else {
-
-			// 	$hora2 = $parte2;
-			// }
-
 			$horas = CursosController::romperHoras($dom);
-
-			// Guardamos y luego devolvemos
 			$dias[] = ['domingo', $horas['hora1'], $horas['hora2']];
 		}
-		
+
 		return $dias;
 	}
 
