@@ -94,11 +94,11 @@ class CursosController extends Controller
 					// 12. Agregamos la información en el array de cursos
 					foreach ($dias as $i => $val) {
 
-						if (isset($cursos[$nombre]['nrc'][$nrc][$dias[$i][0]])) {
-							$cursos[$nombre]['nrc'][$nrc][$dias[$i][0]]['horas'][] = $dias[$i][1];
-							$cursos[$nombre]['nrc'][$nrc][$dias[$i][0]]['horas'][] = $dias[$i][2];
+						if (isset($cursos[$nombre]['nrc'][$nrc]['dia'][$dias[$i][0]])) {
+							$cursos[$nombre]['nrc'][$nrc]['dia'][$dias[$i][0]]['horas'][] = $dias[$i][1];
+							$cursos[$nombre]['nrc'][$nrc]['dia'][$dias[$i][0]]['horas'][] = $dias[$i][2];
 						} else {
-							$cursos[$nombre]['nrc'][$nrc][$dias[$i][0]] = [
+							$cursos[$nombre]['nrc'][$nrc]['dia'][$dias[$i][0]] = [
 								'horas' => [$dias[$i][1], $dias[$i][2]],
 								'edificio' => $dato->Edf,
 								'salon' => $dato->Salon,
@@ -113,6 +113,24 @@ class CursosController extends Controller
 		return $cursos;
 	}
 
+	public function obtenerDia($fechas)
+	{
+		/* 
+			* Array donde vamos a guardar el nombre del día, la hora1 y la hora2.
+			* En una de las filas de un NRC pueden haber varios días,
+			* por ejemplo, en una fila puede haber hora el lunes y el martes.
+		*/
+		$dias = [];
+
+		foreach ($fechas as $dia => $horas_unidas) {
+			if ($horas_unidas) {
+				$horas = CursosController::romperHoras($horas_unidas);
+				$dias[] = [$dia, $horas['hora1'], $horas['hora2']];
+			}
+		}
+
+		return $dias;
+	}
 
 	public function romperHoras($dia)
 	{
@@ -147,68 +165,6 @@ class CursosController extends Controller
 		return $horas;
 	}
 
-
-	public function obtenerDia($fechas)
-	{
-		/* 
-			* Array donde vamos a guardar el nombre del día, la hora1 y la hora2.
-			* En una de las filas de un NRC pueden haber varios días,
-			* por ejemplo, en una fila puede haber hora el lunes y el martes.
-		*/
-		$dias = [];
-
-		foreach ($fechas as $dia => $horas_unidas) {
-			if ($horas_unidas) {
-				$horas = CursosController::romperHoras($horas_unidas);
-				$dias[] = [$dia, $horas['hora1'], $horas['hora2']];
-			}
-		}
-
-		// if ($lun) {
-
-		// 	$horas = CursosController::romperHoras($lun);
-		// 	$dias[] = ['lunes', $horas['hora1'], $horas['hora2']];
-		// }
-
-		// if ($mar) {
-
-		// 	$horas = CursosController::romperHoras($mar);
-		// 	$dias[] = ['martes', $horas['hora1'], $horas['hora2']];
-		// }
-
-		// if ($mie) {
-
-		// 	$horas = CursosController::romperHoras($mie);
-		// 	$dias[] = ['miercoles', $horas['hora1'], $horas['hora2']];
-		// }
-
-		// if ($jue) {
-
-		// 	$horas = CursosController::romperHoras($jue);
-		// 	$dias[] = ['jueves', $horas['hora1'], $horas['hora2']];
-		// }
-
-		// if ($vie) {
-
-		// 	$horas = CursosController::romperHoras($vie);
-		// 	$dias[] = ['viernes', $horas['hora1'], $horas['hora2']];
-		// }
-
-		// if ($sab) {
-
-		// 	$horas = CursosController::romperHoras($sab);
-		// 	$dias[] = ['sabado', $horas['hora1'], $horas['hora2']];
-		// }
-
-		// if ($dom) {
-		// 	$horas = CursosController::romperHoras($dom);
-		// 	$dias[] = ['domingo', $horas['hora1'], $horas['hora2']];
-		// }
-
-		return $dias;
-	}
-
-
 	public function obtenerSemana()
 	{
 		$semana = [
@@ -225,7 +181,6 @@ class CursosController extends Controller
 
 		return $semana;
 	}
-
 
 	function endKey($array, $num)
 	{
@@ -255,7 +210,6 @@ class CursosController extends Controller
 
 		return $llave;
 	}
-
 
 	public function obtenerLabs()
 	{
