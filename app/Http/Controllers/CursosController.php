@@ -134,8 +134,6 @@ class CursosController extends Controller
 
 	public function romperHoras($dia)
 	{
-		$horas = [];
-
 		// Sustraemos las horas del texto de la celda
 		$partes = explode('-', $dia);
 
@@ -167,19 +165,28 @@ class CursosController extends Controller
 
 	public function obtenerSemana()
 	{
-		$semana = [
+		for ($i = 7; $i <= 20; $i++) {
+			$horas[$i] = '';
+		}
 
-			'lunes' => ['7' => '', '8' => '', '9' => '', '10' => '', '11' => '', '12' => '', '13' => '', '14' => '', '15' => '', '16' => '', '17' => '', '18' => '', '19' => '', '20' => ''],
-			'martes' => ['7' => '', '8' => '', '9' => '', '10' => '', '11' => '', '12' => '', '13' => '', '14' => '', '15' => '', '16' => '', '17' => '', '18' => '', '19' => '', '20' => ''],
-			'miercoles' => ['7' => '', '8' => '', '9' => '', '10' => '', '11' => '', '12' => '', '13' => '', '14' => '', '15' => '', '16' => '', '17' => '', '18' => '', '19' => '', '20' => ''],
-			'jueves' => ['7' => '', '8' => '', '9' => '', '10' => '', '11' => '', '12' => '', '13' => '', '14' => '', '15' => '', '16' => '', '17' => '', '18' => '', '19' => '', '20' => ''],
-			'viernes' => ['7' => '', '8' => '', '9' => '', '10' => '', '11' => '', '12' => '', '13' => '', '14' => '', '15' => '', '16' => '', '17' => '', '18' => '', '19' => '', '20' => ''],
-			'sabado' => ['7' => '', '8' => '', '9' => '', '10' => '', '11' => '', '12' => '', '13' => '', '14' => '', '15' => '', '16' => '', '17' => '', '18' => '', '19' => '', '20' => ''],
-			'domingo' => ['7' => '', '8' => '', '9' => '', '10' => '', '11' => '', '12' => '', '13' => '', '14' => '', '15' => '', '16' => '', '17' => '', '18' => '', '19' => '', '20' => '']
+		$dias = ['lunes', 'martes', 'miercoles', 'jueves', 'viernes', 'sabado', 'domingo'];
 
-		];
+		foreach ($dias as $dia) {
+			$semana[$dia] = $horas;
+		}
 
 		return $semana;
+	}
+
+	public function obtenerLabs()
+	{
+		$consulta = DB::select("select distinct Nombre_asignatura from cursos where Seccion like '%1' or Seccion like '%2'");
+
+		foreach ($consulta as $curso) {
+			$laboratorios[] = $curso->Nombre_asignatura;
+		}
+
+		return $laboratorios;
 	}
 
 	function endKey($array, $num)
@@ -211,26 +218,13 @@ class CursosController extends Controller
 		return $llave;
 	}
 
-	public function obtenerLabs()
-	{
-		$consulta = DB::select("select distinct Nombre_asignatura from cursos where Seccion like '%1' or Seccion like '%2';");
-
-		$laboratorios = [];
-
-		foreach ($consulta as $curso) {
-
-			$laboratorios[] = $curso->Nombre_asignatura;
-		}
-
-		return $laboratorios;
-	}
-
 	public function hill_climbing(Request $request)
 	{
 		$nombres = $request->input('nombres');
 		$cursos = CursosController::obtenerCursos();
-		$laboratorios = CursosController::obtenerLabs();
 		$semana = CursosController::obtenerSemana();
+		$laboratorios = CursosController::obtenerLabs();
+		dd($semana);
 		$iteraciones = 500;
 		$cruzados = [];
 		$elegidos = [];
