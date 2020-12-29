@@ -262,8 +262,14 @@ class CursosController extends Controller
 				}
 			}
 		}
-		
+
 		return [$valido, $semana];
+	}
+
+	public function nombreNrc($nrc)
+	{
+		$nombre = DB::select("select Nombre_asignatura from cursos where Nrc = '$nrc' limit 1")[0]->Nombre_asignatura;
+		return $nombre;
 	}
 
 	public function hill_climbing(Request $request)
@@ -298,37 +304,10 @@ class CursosController extends Controller
 					foreach ($listaDias as $dia => $infoDia) {
 
 						$horas = $infoDia['horas'];
-						
+
 						$validarNrc = CursosController::validarNrc($semana, $dia, $horas, $nrc);
-						$valido = $validarNrc[0];
 						$semana = $validarNrc[1];
-						// for ($i = 1; $i <= count($horas); $i++) {
-
-						// 	if ($i % 2 != 0) {
-						// 		$inicio = $i - 1;
-						// 		continue;
-						// 	} else {
-
-						// 		$final = $i - 1;
-
-						// 		for ($j = $horas[$inicio]; $j <= $horas[$final]; $j++) {
-
-						// 			if (empty($semana[$dia][$j]) or $semana[$dia][$j] == $nrc) {
-						// 				$semana[$dia][$j] = $nrc;
-						// 				$valido = true;
-						// 			} else {
-						// 				$valido = false;
-						// 				break;
-						// 			}
-						// 		}
-
-						// 		if ($valido) {
-						// 			continue;
-						// 		} else {
-						// 			break;
-						// 		}
-						// 	}
-						// }
+						$valido = $validarNrc[0];
 
 						if ($valido) {
 							if ($dia == $ultimo_dia) {
@@ -336,8 +315,6 @@ class CursosController extends Controller
 								if (!$tieneLab) {
 									$elegidos[] = $nrc;
 								}
-
-								break;
 							}
 						} else {
 
@@ -486,7 +463,7 @@ class CursosController extends Controller
 				}
 			}
 		}
-		dd($elegidos, $semana);
+
 		// Devolver al estudiante a la selección de cursos si alguno se cruza
 		if ($cruzados) {
 			$error = "Los NRC de los siguientes cursos se cruzan: ";
@@ -505,16 +482,10 @@ class CursosController extends Controller
 
 			return redirect()->back()->with('error', $error);
 		} else {
-
-			//PASO 2: PERTURBAR X PARA OBTENER XP
-
-
 			while ($iteraciones > 0) {
 
-				// Creando una copia de la solución actual
 				$perturbada = $semana;
-
-				// Obteniendo dos NRC al azar totalmente diferentes
+				
 				while (true) {
 					if (count($elegidos) == 1) {
 						$nrc1 = end($elegidos);
@@ -522,28 +493,36 @@ class CursosController extends Controller
 					} else {
 						$nrc1 = array_rand(array_flip($elegidos));
 						$nrc2 = array_rand(array_flip($elegidos));
-
 						if ($nrc1 != $nrc2) {
 							break;
 						}
 					}
 				}
 
-				// Obteniendo los nombres de los cursos del NRC 1 y NRC 2
-				foreach ($nombres as $nombre) {
+				$nombre1 = CursosController::nombreNrc($nrc1);
+				$nombre2 = CursosController::nombreNrc($nrc2);
 
-					foreach ($cursos[$nombre] as $nrc => $val1) {
+				// Se quitan los NRC 1 y 2 de toda la semana perturbada
+				foreach ($perturbada as $dia => $horas) {
 
-						if ($nrc != 'campus' and $nrc != 'fecha_inicio' and $nrc != 'creditos') {
+					foreach ($horas as $hora => $nrc) {
 
-							if ($nrc == $nrc1) {
-								$nombre1 = $nombre;
-							} elseif (isset($nrc2)) {
-								if ($nrc == $nrc2) {
-									$nombre2 = $nombre;
-								}
+						if ($nrc == $nrc1) {
+							$perturbada[$dia][$hora] = '';
+						} elseif (isset($nrc2)) {
+							if ($nrc == $nrc2) {
+								$perturbada[$dia][$hora] = '';
 							}
 						}
+						// elseif (isset($nrc_labo1)) {
+						// 	if ($nrc == $nrc_labo1) {
+						// 		$perturbada[$dia][$hora] = '';
+						// 	}
+						// } elseif (isset($nrc_labo2)) {
+						// 	if ($nrc == $nrc_labo2) {
+						// 		$perturbada[$dia][$hora] = '';
+						// 	}
+						// }
 					}
 				}
 
@@ -551,99 +530,32 @@ class CursosController extends Controller
 				$corequisito1 = false;
 				$corequisito2 = false;
 
-				// Tiene correquisito de laboratorio
-				foreach ($laboratorios as $curso) {
-					if ($curso == $nombre1) {
-						$corequisito1 = true;
+				// // Tiene correquisito de laboratorio
+				// foreach ($laboratorios as $curso) {
+				// 	if ($curso == $nombre1) {
+				// 		$corequisito1 = true;
 
-						foreach ($elegidos_labs as $elegido_lab1) {
-							$nombre_elegido = DB::select("select Nombre_asignatura from cursos where Nrc = '$elegido_lab1' limit 1")[0]->Nombre_asignatura;
+				// 		foreach ($elegidos_labs as $elegido_lab1) {
+				// 			$nombre_elegido = DB::select("select Nombre_asignatura from cursos where Nrc = '$elegido_lab1' limit 1")[0]->Nombre_asignatura;
 
-							if ($nombre_elegido == $nombre1) {
-								$nrc_labo1 = $elegido_lab1;
-							}
-						}
-					} elseif (isset($nrc2)) {
-						if ($curso == $nombre2) {
-							$corequisito2 = true;
+				// 			if ($nombre_elegido == $nombre1) {
+				// 				$nrc_labo1 = $elegido_lab1;
+				// 			}
+				// 		}
+				// 	} elseif (isset($nrc2)) {
+				// 		if ($curso == $nombre2) {
+				// 			$corequisito2 = true;
 
-							foreach ($elegidos_labs as $elegido_lab2) {
-								$nombre_elegido = DB::select("select Nombre_asignatura from cursos where Nrc = '$elegido_lab2' limit 1")[0]->Nombre_asignatura;
+				// 			foreach ($elegidos_labs as $elegido_lab2) {
+				// 				$nombre_elegido = DB::select("select Nombre_asignatura from cursos where Nrc = '$elegido_lab2' limit 1")[0]->Nombre_asignatura;
 
-								if ($nombre_elegido == $nombre2) {
-									$nrc_labo2 = $elegido_lab2;
-								}
-							}
-						}
-					}
-				}
-
-
-				// Se quitan los NRC 1 y 2 de toda la semana perturbada
-				foreach ($perturbada as $day => $hours) {
-
-					foreach ($hours as $hour => $nrc) {
-
-						if ($nrc == $nrc1) {
-							$perturbada[$day][$hour] = '';
-						} elseif (isset($nrc2)) {
-							if ($nrc == $nrc2) {
-								$perturbada[$day][$hour] = '';
-							}
-						} elseif (isset($nrc_labo1)) {
-							if ($nrc == $nrc_labo1) {
-								$perturbada[$day][$hour] = '';
-							}
-						} elseif (isset($nrc_labo2)) {
-							if ($nrc == $nrc_labo2) {
-								$perturbada[$day][$hour] = '';
-							}
-						}
-					}
-				}
-
-				// Borramos los NRC viejos de los elegidos
-				foreach ($elegidos as $i => $elegido) {
-
-					if ($elegido == $nrc1) {
-
-						unset($elegidos[$i]);
-					} elseif (isset($nrc2)) {
-
-						if ($elegido == $nrc2) {
-
-							unset($elegidos[$i]);
-						}
-					}
-				}
-
-				// Borramos los NRC viejos de los elegidos_labs
-				foreach ($elegidos_labs as $i => $elegido_lab) {
-
-					if (isset($nrc_labo1)) {
-						if ($elegido_lab == $nrc_labo1) {
-							unset($elegidos_labs[$i]);
-						}
-					}
-
-					if (isset($nrc_labo2)) {
-						if ($elegido_lab == $nrc_labo2) {
-							unset($elegidos_labs[$i]);
-						}
-					}
-				}
-
-				//PROGRESO:
-				/*
-                    - 127 vs 489
-                    - En el paso 1 se obtiene un horario inicial
-                    - En el paso 2 se obtienen los nrc al azar
-                    - Luego los nombres de esos nrc
-                    - Luego se mira si tienen laboratorio
-                    - Luego se borran los nrc de elegidos
-                    - Luego se borran los nrc de elegidos labs
-                    - Ahora se comienza a llenar nuevos nrc elegidos al azar
-                */
+				// 				if ($nombre_elegido == $nombre2) {
+				// 					$nrc_labo2 = $elegido_lab2;
+				// 				}
+				// 			}
+				// 		}
+				// 	}
+				// }
 
 				// Se agregan los nuevos NRC de los cursos elegidos al azar
 				while (true) {
@@ -947,6 +859,37 @@ class CursosController extends Controller
 						}
 					}
 				}
+
+				// // Borramos los NRC viejos de los elegidos
+				// foreach ($elegidos as $i => $elegido) {
+
+				// 	if ($elegido == $nrc1) {
+
+				// 		unset($elegidos[$i]);
+				// 	} elseif (isset($nrc2)) {
+
+				// 		if ($elegido == $nrc2) {
+
+				// 			unset($elegidos[$i]);
+				// 		}
+				// 	}
+				// }
+
+				// // Borramos los NRC viejos de los elegidos_labs
+				// foreach ($elegidos_labs as $i => $elegido_lab) {
+
+				// 	if (isset($nrc_labo1)) {
+				// 		if ($elegido_lab == $nrc_labo1) {
+				// 			unset($elegidos_labs[$i]);
+				// 		}
+				// 	}
+
+				// 	if (isset($nrc_labo2)) {
+				// 		if ($elegido_lab == $nrc_labo2) {
+				// 			unset($elegidos_labs[$i]);
+				// 		}
+				// 	}
+				// }
 
 				// Borramos los NRC viejos de los elegidos
 				foreach ($elegidos as $i => $elegido) {
