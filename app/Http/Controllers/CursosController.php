@@ -277,7 +277,7 @@ class CursosController extends Controller
 		$nombres = $request->input('nombres');
 		$cursos = CursosController::obtenerCursos();
 		$semana = CursosController::obtenerSemana();
-		$laboratorios = CursosController::obtenerLabs(); // Posiblemente se puede quitar
+		$laboratorios = CursosController::obtenerLabs();
 		$iteraciones = 500;
 		$cruzados = [];
 		$elegidos = [];
@@ -317,7 +317,6 @@ class CursosController extends Controller
 								}
 							}
 						} else {
-
 							// Se quita el NRC de toda la semana
 							foreach ($semana as $day => $hours) {
 								foreach ($hours as $hour => $time) {
@@ -464,7 +463,6 @@ class CursosController extends Controller
 			}
 		}
 
-		// Devolver al estudiante a la selección de cursos si alguno se cruza
 		if ($cruzados) {
 			$error = "Los NRC de los siguientes cursos se cruzan: ";
 
@@ -484,15 +482,18 @@ class CursosController extends Controller
 		} else {
 			while ($iteraciones > 0) {
 
-				$perturbada = $semana;
-				
+				$semana_x = $semana;
+
 				while (true) {
 					if (count($elegidos) == 1) {
 						$nrc1 = end($elegidos);
 						break;
 					} else {
-						$nrc1 = array_rand(array_flip($elegidos));
-						$nrc2 = array_rand(array_flip($elegidos));
+						// TESTEO
+						$nrc1 = 1989;
+						$nrc2 = 2039;
+						// $nrc1 = array_rand(array_flip($elegidos));
+						// $nrc2 = array_rand(array_flip($elegidos));
 						if ($nrc1 != $nrc2) {
 							break;
 						}
@@ -500,156 +501,263 @@ class CursosController extends Controller
 				}
 
 				$nombre1 = CursosController::nombreNrc($nrc1);
-				$nombre2 = CursosController::nombreNrc($nrc2);
+				if (isset($nrc2)) {
+					$nombre2 = CursosController::nombreNrc($nrc2);
+				}
 
-				// Se quitan los NRC 1 y 2 de toda la semana perturbada
-				foreach ($perturbada as $dia => $horas) {
+				$tieneLab1 = false;
+				$tieneLab2 = false;
+
+				foreach ($laboratorios as $nombreLab) {
+					// if ($nombreLab == $nombre1) {
+					// 	$tieneLab1 = true;
+
+					// 	foreach ($elegidos_labs as $elegido_lab1) {
+					// 		$nombre_elegido = DB::select("select Nombre_asignatura from cursos where Nrc = '$elegido_lab1' limit 1")[0]->Nombre_asignatura;
+
+					// 		if ($nombre_elegido == $nombre1) {
+					// 			$nrc_labo1 = $elegido_lab1;
+					// 		}
+					// 	}
+					// } elseif (isset($nrc2)) {
+					// 	if ($nombreLab == $nombre2) {
+					// 		$tieneLab2 = true;
+
+					// 		foreach ($elegidos_labs as $elegido_lab2) {
+					// 			$nombre_elegido = DB::select("select Nombre_asignatura from cursos where Nrc = '$elegido_lab2' limit 1")[0]->Nombre_asignatura;
+
+					// 			if ($nombre_elegido == $nombre2) {
+					// 				$nrc_labo2 = $elegido_lab2;
+					// 			}
+					// 		}
+					// 	}
+					// }
+				}
+
+				foreach ($semana_x as $dia => $horas) {
 
 					foreach ($horas as $hora => $nrc) {
 
 						if ($nrc == $nrc1) {
-							$perturbada[$dia][$hora] = '';
+							$semana_x[$dia][$hora] = '';
 						} elseif (isset($nrc2)) {
 							if ($nrc == $nrc2) {
-								$perturbada[$dia][$hora] = '';
+								$semana_x[$dia][$hora] = '';
+							}
+						} elseif (isset($nrc_labo1)) {
+							if ($nrc == $nrc_labo1) {
+								$semana_x[$dia][$hora] = '';
+							}
+						} elseif (isset($nrc_labo2)) {
+							if ($nrc == $nrc_labo2) {
+								$semana_x[$dia][$hora] = '';
 							}
 						}
-						// elseif (isset($nrc_labo1)) {
-						// 	if ($nrc == $nrc_labo1) {
-						// 		$perturbada[$dia][$hora] = '';
-						// 	}
-						// } elseif (isset($nrc_labo2)) {
-						// 	if ($nrc == $nrc_labo2) {
-						// 		$perturbada[$dia][$hora] = '';
-						// 	}
-						// }
 					}
 				}
 
-				// Se comprueba si los NRC tienen laboratorio
-				$corequisito1 = false;
-				$corequisito2 = false;
-
-				// // Tiene correquisito de laboratorio
-				// foreach ($laboratorios as $curso) {
-				// 	if ($curso == $nombre1) {
-				// 		$corequisito1 = true;
-
-				// 		foreach ($elegidos_labs as $elegido_lab1) {
-				// 			$nombre_elegido = DB::select("select Nombre_asignatura from cursos where Nrc = '$elegido_lab1' limit 1")[0]->Nombre_asignatura;
-
-				// 			if ($nombre_elegido == $nombre1) {
-				// 				$nrc_labo1 = $elegido_lab1;
-				// 			}
-				// 		}
-				// 	} elseif (isset($nrc2)) {
-				// 		if ($curso == $nombre2) {
-				// 			$corequisito2 = true;
-
-				// 			foreach ($elegidos_labs as $elegido_lab2) {
-				// 				$nombre_elegido = DB::select("select Nombre_asignatura from cursos where Nrc = '$elegido_lab2' limit 1")[0]->Nombre_asignatura;
-
-				// 				if ($nombre_elegido == $nombre2) {
-				// 					$nrc_labo2 = $elegido_lab2;
-				// 				}
-				// 			}
-				// 		}
-				// 	}
-				// }
-
-				// Se agregan los nuevos NRC de los cursos elegidos al azar
 				while (true) {
 
-					$aleatorio1 = array_rand(array_flip(array_keys($cursos[$nombre1])));
+					$perturbada = $semana_x;
 
-					if ($aleatorio1 != 'campus' and $aleatorio1 != 'fecha_inicio' and $aleatorio1 != 'creditos') {
+					$listaNrc1 = $cursos[$nombre1]['nrc'];
+					// TESTEO
+					$aleatorio1 = 1996;
+					// $aleatorio1 = array_rand(array_flip(array_keys($listaNrc1)));
+					$listaDias1 = $listaNrc1[$aleatorio1]['dias'];
+					$seccion1 = $listaNrc1[$aleatorio1]['seccion'];
 
-						$seccion = $cursos[$nombre1][$aleatorio1]['seccion'];
+					if (substr($seccion1, -1) == "1" or substr($seccion1, -1) == "2") {
+						continue;
+					} else {
 
-						if (substr($seccion, -1) == "1" or substr($seccion, -1) == "2") {
-							continue;
-						} else {
-							// NRC aceptado
-							$aceptado1 = false;
+						$aceptado1 = false;
+						$ultimo_dia = CursosController::endKey($listaDias1, 2);
 
-							// $ultimo_nrc es aleatorio1 en este caso
+						foreach ($listaDias1 as $dia => $infoDia) {
 
-							// Último día del NRC
-							$ultimo_dia = CursosController::endKey($cursos[$nombre1][$aleatorio1], 2);
+							$horas = $infoDia['horas'];
 
-							// Aquí se están revisando todos los día de la semana del NRC aleatorio
-							foreach ($cursos[$nombre1][$aleatorio1] as $dia => $val2) {
+							$validarNrc = CursosController::validarNrc($perturbada, $dia, $horas, $aleatorio1);
+							$perturbada = $validarNrc[1];
+							$valido = $validarNrc[0];
 
-								if ($dia != 'materia' and $dia != 'curso' and $dia != 'seccion' and $dia != 'capacidad' and $dia != 'disponibles' and $dia != 'ocupados' and $dia != 'codigo_docente' and $dia != 'docente' and $dia != 'tipo') {
-
-									$horas = $cursos[$nombre1][$aleatorio1][$dia]['horas'];
-
-									for ($i = 1; $i <= count($horas); $i++) {
-
-										if ($i % 2 != 0) {
-
-											$inicio = $i - 1;
-											continue;
-										} else {
-
-											$final = $i - 1;
-
-											for ($j = $horas[$inicio]; $j <= $horas[$final]; $j++) {
-
-												if (empty($perturbada[$dia][$j]) or $perturbada[$dia][$j] == $aleatorio1) {
-
-													$perturbada[$dia][$j] = $aleatorio1;
-
-													$valido = true;
-												} else {
-
-													$valido = false;
-													break; // break 2 inicio
-												}
-											}
-											// break 2 final
-											if ($valido) {
-
-												continue;
-											} else {
-
-												break; // break 3 inicio
-											}
-										}
-									}
-									// break 3 final
-									if ($valido) {
-										if ($dia == $ultimo_dia) {
-											$aceptado1 = true;
-
-											if (!$corequisito1) {
-												$elegidos[] = $aleatorio1;
-											}
-
-											break; // break 1 inicio
-										}
-									} else {
-										// Se quita el NRC de toda la semana
-										foreach ($perturbada as $day => $hours) {
-											foreach ($hours as $hour => $time) {
-												if ($time == $aleatorio1) {
-													$perturbada[$day][$hour] = '';
-												}
-											}
-										}
-
-										break; // break 1 inicio
+							if ($valido) {
+								if ($dia == $ultimo_dia) {
+									$aceptado1 = true;
+									if (!$tieneLab1) {
+										$elegidos[] = $aleatorio1;
 									}
 								}
+							} else {
+								foreach ($perturbada as $day => $hours) {
+									foreach ($hours as $hour => $time) {
+										if ($time == $aleatorio1) {
+											$perturbada[$day][$hour] = '';
+										}
+									}
+								}
+								break;
 							}
-							// break 1 final
+						}
 
-							if ($aceptado1) {
+						if ($aceptado1) {
 
-								if ($corequisito1) {
+							if ($tieneLab1) {
+								$nrc_labs = [];
+
+								$seleccion = DB::select("select Nrc from cursos where Seccion Like '" . $seccion1 . "%' and (Seccion like '%1' or Seccion like '%2') and Nombre_asignatura = '" . $nombre1 . "'");
+
+								foreach ($seleccion as $clave => $valor) {
+									$nrc_labs[] = $valor->Nrc;
+								}
+
+								foreach ($nrc_labs as $nrc_lab) {
+									// NRC aceptado
+									$aceptado_lab = false;
+
+									// Último NRC
+									$ultimo_nrc_lab = end($nrc_labs);
+
+									// Último día del NRC
+									$ultimo_dia_lab = CursosController::endKey($cursos[$nombre1][$nrc_lab], 2);
+
+									foreach ($cursos[$nombre1][$nrc_lab] as $dia => $val2) {
+
+										if ($dia != 'materia' and $dia != 'curso' and $dia != 'seccion' and $dia != 'capacidad' and $dia != 'disponibles' and $dia != 'ocupados' and $dia != 'codigo_docente' and $dia != 'docente' and $dia != 'tipo') {
+
+											$horas = $cursos[$nombre1][$nrc_lab][$dia]['horas'];
+
+											for ($i = 1; $i <= count($horas); $i++) {
+
+												if ($i % 2 != 0) {
+
+													$inicio = $i - 1;
+													continue;
+												} else {
+
+													$final = $i - 1;
+
+													for ($j = $horas[$inicio]; $j <= $horas[$final]; $j++) {
+
+														if (empty($perturbada[$dia][$j]) or $perturbada[$dia][$j] == $nrc_lab) {
+
+															$perturbada[$dia][$j] = $nrc_lab;
+
+															$valido = true;
+														} else {
+
+															$valido = false;
+															break;
+														}
+													}
+
+													if ($valido) {
+
+														continue;
+													} else {
+
+														break;
+													}
+												}
+											}
+
+											if ($valido) {
+												if ($dia == $ultimo_dia_lab) {
+													$aceptado_lab = true;
+													$elegidos_labs[] = $nrc_lab;
+													$elegidos[] = $aleatorio1;
+													break;
+												}
+											} else {
+
+												// Se quita el NRC de toda la semana
+												foreach ($perturbada as $day => $hours) {
+													foreach ($hours as $hour => $time) {
+														if ($time == $nrc_lab) {
+															$perturbada[$day][$hour] = '';
+														}
+													}
+												}
+
+												if ($nrc_lab == $ultimo_nrc_lab) {
+													// Se quita el NRC de toda la semana
+													foreach ($perturbada as $day => $hours) {
+														foreach ($hours as $hour => $time) {
+															if ($time == $aleatorio1) {
+																$perturbada[$day][$hour] = '';
+															}
+														}
+													}
+												}
+
+												break;
+											}
+										}
+									}
+
+									if ($aceptado_lab) {
+										break;
+									}
+								}
+
+								if (!$aceptado_lab) {
+									continue;
+								}
+							}
+						} else {
+							continue;
+						}
+					}
+
+					if (isset($nombre2)) {
+
+						$listaNrc2 = $cursos[$nombre2]['nrc'];
+						// TESTEO
+						$aleatorio2 = 2043;
+						// $aleatorio2 = array_rand(array_flip(array_keys($listaNrc2)));
+						$listaDias2 = $listaNrc2[$aleatorio2]['dias'];
+						$seccion2 = $listaNrc2[$aleatorio2]['seccion'];
+
+						if (substr($seccion2, -1) == "1" or substr($seccion2, -1) == "2") {
+							continue;
+						} else {
+
+							$aceptado2 = false;
+							$ultimo_dia = CursosController::endKey($listaDias2, 2);
+
+							foreach ($listaDias2 as $dia => $infoDia) {
+
+								$horas = $infoDia['horas'];
+
+								$validarNrc = CursosController::validarNrc($perturbada, $dia, $horas, $aleatorio2);
+								$perturbada = $validarNrc[1];
+								$valido = $validarNrc[0];
+
+								if ($valido) {
+									if ($dia == $ultimo_dia) {
+										$aceptado2 = true;
+										if (!$tieneLab2) {
+											$elegidos[] = $aleatorio2;
+										}
+									}
+								} else {
+									foreach ($perturbada as $day => $hours) {
+										foreach ($hours as $hour => $time) {
+											if ($time == $aleatorio2) {
+												$perturbada[$day][$hour] = '';
+											}
+										}
+									}
+									break;
+								}
+							}
+
+							if ($aceptado2) {
+								if ($tieneLab2) {
 									$nrc_labs = [];
 
-									$seleccion = DB::select("select Nrc from cursos where Seccion Like '" . $seccion . "%' and (Seccion like '%1' or Seccion like '%2') and Nombre_asignatura = '" . $nombre1 . "'");
+									$seleccion = DB::select("select Nrc from cursos where Seccion Like '" . $seccion2 . "%' and (Seccion like '%1' or Seccion like '%2') and Nombre_asignatura = '" . $nombre2 . "'");
 
 									foreach ($seleccion as $clave => $valor) {
 										$nrc_labs[] = $valor->Nrc;
@@ -663,13 +771,13 @@ class CursosController extends Controller
 										$ultimo_nrc_lab = end($nrc_labs);
 
 										// Último día del NRC
-										$ultimo_dia_lab = CursosController::endKey($cursos[$nombre1][$nrc_lab], 2);
+										$ultimo_dia_lab = CursosController::endKey($cursos[$nombre2][$nrc_lab], 2);
 
-										foreach ($cursos[$nombre1][$nrc_lab] as $dia => $val2) {
+										foreach ($cursos[$nombre2][$nrc_lab] as $dia => $val2) {
 
 											if ($dia != 'materia' and $dia != 'curso' and $dia != 'seccion' and $dia != 'capacidad' and $dia != 'disponibles' and $dia != 'ocupados' and $dia != 'codigo_docente' and $dia != 'docente' and $dia != 'tipo') {
 
-												$horas = $cursos[$nombre1][$nrc_lab][$dia]['horas'];
+												$horas = $cursos[$nombre2][$nrc_lab][$dia]['horas'];
 
 												for ($i = 1; $i <= count($horas); $i++) {
 
@@ -709,7 +817,7 @@ class CursosController extends Controller
 													if ($dia == $ultimo_dia_lab) {
 														$aceptado_lab = true;
 														$elegidos_labs[] = $nrc_lab;
-														$elegidos[] = $aleatorio1;
+														$elegidos[] = $aleatorio2;
 														break;
 													}
 												} else {
@@ -727,7 +835,7 @@ class CursosController extends Controller
 														// Se quita el NRC de toda la semana
 														foreach ($perturbada as $day => $hours) {
 															foreach ($hours as $hour => $time) {
-																if ($time == $aleatorio1) {
+																if ($time == $aleatorio2) {
 																	$perturbada[$day][$hour] = '';
 																}
 															}
@@ -748,100 +856,9 @@ class CursosController extends Controller
 										continue;
 									}
 								}
-
-								break; // break 2 inicio
-							}
-
-							if ($aleatorio1 == $ultimo_nrc) {
-								$cruzados[] = $nombre1;
-							}
-
-							if (!$aceptado1) {
-								// Se repite el while de la línea 380
+							} else {
 								continue;
 							}
-						}
-					} else {
-						// Se repite el while de la línea 380
-						continue;
-					}
-
-					if (isset($nombre2)) {
-						$aleatorio2 = array_rand(array_flip(array_keys($cursos[$nombre2])));
-
-						if ($aleatorio2 != 'campus' and $aleatorio2 != 'fecha_inicio' and $aleatorio2 != 'creditos') {
-							// NRC aceptado
-							$aceptado2 = false;
-
-							// Último día del NRC
-							$ultimo_dia = CursosController::endKey($cursos[$nombre2][$aleatorio2]);
-
-							// Aquí se están revisando todos los día de la semana del NRC aleatorio
-							foreach ($cursos[$nombre2][$aleatorio2] as $dia => $val2) {
-
-								if ($dia != 'materia' and $dia != 'curso' and $dia != 'seccion' and $dia != 'capacidad' and $dia != 'disponibles' and $dia != 'ocupados' and $dia != 'codigo_docente' and $dia != 'docente' and $dia != 'tipo') {
-
-									$horas = $cursos[$nombre2][$aleatorio2][$dia]['horas'];
-
-									for ($i = 1; $i <= count($horas); $i++) {
-
-										if ($i % 2 != 0) {
-
-											$inicio = $i - 1;
-											continue;
-										} else {
-
-											$final = $i - 1;
-
-											for ($j = $horas[$inicio]; $j <= $horas[$final]; $j++) {
-
-												if (empty($perturbada[$dia][$j]) or $perturbada[$dia][$j] == $aleatorio2) {
-
-													$perturbada[$dia][$j] = $aleatorio2;
-
-													$valido = true;
-												} else {
-
-													$valido = false;
-													break;
-												}
-											}
-
-											if ($valido) {
-
-												continue;
-											} else {
-
-												break;
-											}
-										}
-									}
-
-									if ($valido) {
-										if ($dia == $ultimo_dia) {
-											$aceptado2 = true;
-											break;
-										}
-									} else {
-										// Se quita el NRC de toda la semana
-										foreach ($perturbada as $day => $hours) {
-											foreach ($hours as $hour => $time) {
-												if ($time == $aleatorio2) {
-													$perturbada[$day][$hour] = '';
-												}
-											}
-										}
-
-										break;
-									}
-								}
-							}
-
-							if (!$aceptado2) {
-								continue;
-							}
-						} else {
-							continue;
 						}
 					}
 
@@ -859,6 +876,8 @@ class CursosController extends Controller
 						}
 					}
 				}
+
+				dd($nrc1, $nrc2, $nombre1, $nombre2, $aleatorio1, $aleatorio2, $semana, $perturbada);
 
 				// // Borramos los NRC viejos de los elegidos
 				// foreach ($elegidos as $i => $elegido) {
