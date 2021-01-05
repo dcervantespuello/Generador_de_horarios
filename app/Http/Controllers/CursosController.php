@@ -272,11 +272,12 @@ class CursosController extends Controller
 		return $nombre;
 	}
 
-	public function permutacion($nombre, $perturbada, $tienelab, $num)
+	public function permutacion($nombre, $perturbada, $tienelab, $elegidos, $num)
 	{
 		$resultado['continue'] = false;
 		$resultado['aceptado'] = false;
 		$resultado['perturbada'] = [];
+		$resultado['elegidos'] = [];
 		$cursos = CursosController::obtenerCursos();
 		$listaNrc = $cursos[$nombre]['nrc'];
 		// TESTEO
@@ -430,6 +431,7 @@ class CursosController extends Controller
 
 				$resultado['aceptado'] = true;
 				$resultado['perturbada'] = $perturbada;
+				$resultado['elegidos'] = $elegidos;
 				return $resultado;
 			} else {
 				$resultado['continue'] = true;
@@ -649,6 +651,7 @@ class CursosController extends Controller
 			while ($iteraciones > 0) {
 
 				$semana_x = $semana;
+				$elegidos_x = $elegidos;
 
 				while (true) {
 					if (count($elegidos) == 1) {
@@ -725,23 +728,26 @@ class CursosController extends Controller
 				while (true) {
 
 					$perturbada = $semana_x;
+					$elegidos = $elegidos_x;
 
-					$permutacion1 = CursosController::permutacion($nombre1, $perturbada, $tieneLab1, 1);
+					$permutacion1 = CursosController::permutacion($nombre1, $perturbada, $tieneLab1, $elegidos, 1);
 					if ($permutacion1['continue']) {
 						continue;
 					} else {
 						$aceptado1 = $permutacion1['aceptado'];
 						$perturbada = $permutacion1['perturbada'];
+						$elegidos = $permutacion1['elegidos'];
 					}
 
 					if (isset($nombre2)) {
 
-						$permutacion2 = CursosController::permutacion($nombre2, $perturbada, $tieneLab2, 2);
+						$permutacion2 = CursosController::permutacion($nombre2, $perturbada, $tieneLab2, $elegidos, 2);
 						if ($permutacion2['continue']) {
 							continue;
 						} else {
 							$aceptado2 = $permutacion2['aceptado'];
 							$perturbada = $permutacion2['perturbada'];
+							$elegidos = $permutacion2['elegidos'];
 						}
 					}
 
@@ -760,23 +766,16 @@ class CursosController extends Controller
 					}
 				}
 
-				dd($nrc1, $nrc2, $nombre1, $nombre2, $semana, $perturbada);
-
-				// // Borramos los NRC viejos de los elegidos
-				// foreach ($elegidos as $i => $elegido) {
-
-				// 	if ($elegido == $nrc1) {
-
-				// 		unset($elegidos[$i]);
-				// 	} elseif (isset($nrc2)) {
-
-				// 		if ($elegido == $nrc2) {
-
-				// 			unset($elegidos[$i]);
-				// 		}
-				// 	}
-				// }
-
+				foreach ($elegidos as $i => $elegido) {
+					if ($elegido == $nrc1) {
+						unset($elegidos[$i]);
+					} elseif (isset($nrc2)) {
+						if ($elegido == $nrc2) {
+							unset($elegidos[$i]);
+						}
+					}
+				}
+				dd($elegidos);
 				// // Borramos los NRC viejos de los elegidos_labs
 				// foreach ($elegidos_labs as $i => $elegido_lab) {
 
