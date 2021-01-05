@@ -440,6 +440,30 @@ class CursosController extends Controller
 		}
 	}
 
+	public function contarHuecos($semana)
+	{
+		$posiciones = [];
+		$contador = 0;
+		$huecos = 0;
+
+		foreach ($semana as $dia => $horas) {
+			foreach ($horas as $hora => $nrc) {
+				$contador += 1;
+				if ($nrc) {
+					$posiciones[] = $contador;
+				}
+			}
+		}
+
+		for ($i = $posiciones[0] + 1; $i < end($posiciones); $i++) {
+			if (!in_array($i, $posiciones)) {
+				$huecos += 1;
+			}
+		}
+		
+		return $huecos;
+	}
+
 	public function hill_climbing(Request $request)
 	{
 		$nombres = $request->input('nombres');
@@ -793,56 +817,13 @@ class CursosController extends Controller
 					// 	}
 				}
 
-				// Función objetivo con respecto a x
-				$posiciones1 = [];
-				$contador1 = 0;
-
-				// Obtenemos las posiciones de los NRC en la semana
-				foreach ($semana as $dia => $horas) {
-
-					foreach ($horas as $hora => $nrc) {
-						$contador1 += 1;
-						if ($nrc) {
-							$posiciones1[] = $contador1;
-						}
-					}
-				}
-
-				$zx = 0;
-
-				for ($i = $posiciones1[0] + 1; $i < end($posiciones1); $i++) {
-					if (!in_array($i, $posiciones1)) {
-						$zx += 1;
-					}
-				}
-
-				// Función objetivo con respecto a x perturbada
-				$posiciones2 = [];
-				$contador2 = 0;
-
-				// Obtenemos las posiciones de los NRC en la semana perturbada
-				foreach ($perturbada as $dia => $horas) {
-
-					foreach ($horas as $hora => $nrc) {
-						$contador2 += 1;
-						if ($nrc) {
-							$posiciones2[] = $contador2;
-						}
-					}
-				}
-
-				$zxp = 0;
-
-				for ($i = $posiciones2[0] + 1; $i < end($posiciones2); $i++) {
-					if (!in_array($i, $posiciones2)) {
-						$zxp += 1;
-					}
-				}
-
+				$zx = CursosController::contarHuecos($semana);
+				$zxp = CursosController::contarHuecos($perturbada);
+				
 				if ($zxp < $zx) {
 					$semana = $perturbada;
 				}
-				
+
 				$iteraciones -= 500;
 			}
 
