@@ -775,46 +775,23 @@ class CursosController extends Controller
 						}
 					}
 				}
-				dd($elegidos);
-				// // Borramos los NRC viejos de los elegidos_labs
-				// foreach ($elegidos_labs as $i => $elegido_lab) {
+				$elegidos = array_values($elegidos);
 
-				// 	if (isset($nrc_labo1)) {
-				// 		if ($elegido_lab == $nrc_labo1) {
-				// 			unset($elegidos_labs[$i]);
-				// 		}
-				// 	}
+				// Borramos los NRC viejos de los elegidos_labs
+				foreach ($elegidos_labs as $i => $elegido_lab) {
 
-				// 	if (isset($nrc_labo2)) {
-				// 		if ($elegido_lab == $nrc_labo2) {
-				// 			unset($elegidos_labs[$i]);
-				// 		}
-				// 	}
-				// }
+					// 	if (isset($nrc_labo1)) {
+					// 		if ($elegido_lab == $nrc_labo1) {
+					// 			unset($elegidos_labs[$i]);
+					// 		}
+					// 	}
 
-				// Borramos los NRC viejos de los elegidos
-				foreach ($elegidos as $i => $elegido) {
-
-					if ($elegido == $nrc1) {
-
-						unset($elegidos[$i]);
-					} elseif (isset($nrc2)) {
-
-						if ($elegido == $nrc2) {
-
-							unset($elegidos[$i]);
-						}
-					}
+					// 	if (isset($nrc_labo2)) {
+					// 		if ($elegido_lab == $nrc_labo2) {
+					// 			unset($elegidos_labs[$i]);
+					// 		}
+					// 	}
 				}
-
-				// Agregamos los NRC nuevos a los elegidos
-				$elegidos[] = $aleatorio1;
-
-				if (isset($aleatorio2)) {
-					$elegidos[] = $aleatorio2;
-				}
-
-
 
 				// PASO 3: CALCULAR FUNCIÓN OBJETIVO ZX Y ZXP Y COMPARARLAS
 
