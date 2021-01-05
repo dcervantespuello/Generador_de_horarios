@@ -793,9 +793,6 @@ class CursosController extends Controller
 					// 	}
 				}
 
-				// PASO 3: CALCULAR FUNCIÓN OBJETIVO ZX Y ZXP Y COMPARARLAS
-
-
 				// Función objetivo con respecto a x
 				$posiciones1 = [];
 				$contador1 = 0;
@@ -804,18 +801,20 @@ class CursosController extends Controller
 				foreach ($semana as $dia => $horas) {
 
 					foreach ($horas as $hora => $nrc) {
-
 						$contador1 += 1;
-
 						if ($nrc) {
-
 							$posiciones1[] = $contador1;
 						}
 					}
 				}
 
-				$zx = end($posiciones1) - $posiciones1[0];
+				$zx = 0;
 
+				for ($i = $posiciones1[0] + 1; $i < end($posiciones1); $i++) {
+					if (!in_array($i, $posiciones1)) {
+						$zx += 1;
+					}
+				}
 
 				// Función objetivo con respecto a x perturbada
 				$posiciones2 = [];
@@ -825,31 +824,29 @@ class CursosController extends Controller
 				foreach ($perturbada as $dia => $horas) {
 
 					foreach ($horas as $hora => $nrc) {
-
 						$contador2 += 1;
-
 						if ($nrc) {
-
 							$posiciones2[] = $contador2;
 						}
 					}
 				}
 
-				$zxp = end($posiciones2) - $posiciones2[0];
+				$zxp = 0;
 
-
-				if ($zxp < $zx) {
-					// Actualizamos la semana
-					$semana = $perturbada;
+				for ($i = $posiciones2[0] + 1; $i < end($posiciones2); $i++) {
+					if (!in_array($i, $posiciones2)) {
+						$zxp += 1;
+					}
 				}
 
-				// Descontamos una iteración
-				$iteraciones -= 1;
+				if ($zxp < $zx) {
+					$semana = $perturbada;
+				}
+				
+				$iteraciones -= 500;
 			}
 
-
 			// Agregando los nombres de los cursos
-
 			$definitivos = [];
 
 			foreach ($semana as $dia => $horas) {
@@ -863,15 +860,11 @@ class CursosController extends Controller
 				}
 			}
 
-
 			// Ordenando para mostrar horario generado
-
 			$filas = [];
 
 			for ($i = 7; $i <= 20; $i++) {
-
 				foreach ($semana as $dia => $horas) {
-
 					$filas[$i][] = $semana[$dia][$i];
 				}
 			}
