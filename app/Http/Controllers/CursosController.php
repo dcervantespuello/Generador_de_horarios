@@ -272,21 +272,14 @@ class CursosController extends Controller
 		return $nombre;
 	}
 
-	public function permutacion($nombre, $perturbada, $tienelab, $elegidos, $num)
+	public function permutacion($nombre, $perturbada, $tienelab, $elegidos, $cursos, $num)
 	{
 		$resultado['continue'] = false;
 		$resultado['aceptado'] = false;
 		$resultado['perturbada'] = [];
 		$resultado['elegidos'] = [];
-		$cursos = CursosController::obtenerCursos();
 		$listaNrc = $cursos[$nombre]['nrc'];
-		// TESTEO
-		if ($num == 1) {
-			$aleatorio = 1996;
-		} else {
-			$aleatorio = 2043;
-		}
-		// $aleatorio = array_rand(array_flip(array_keys($listaNrc)));
+		$aleatorio = array_rand(array_flip(array_keys($listaNrc)));
 		$listaDias = $listaNrc[$aleatorio]['dias'];
 		$seccion = $listaNrc[$aleatorio]['seccion'];
 
@@ -682,11 +675,8 @@ class CursosController extends Controller
 						$nrc1 = end($elegidos);
 						break;
 					} else {
-						// TESTEO
-						$nrc1 = 1989;
-						$nrc2 = 2039;
-						// $nrc1 = array_rand(array_flip($elegidos));
-						// $nrc2 = array_rand(array_flip($elegidos));
+						$nrc1 = array_rand(array_flip($elegidos));
+						$nrc2 = array_rand(array_flip($elegidos));
 						if ($nrc1 != $nrc2) {
 							break;
 						}
@@ -754,7 +744,7 @@ class CursosController extends Controller
 					$perturbada = $semana_x;
 					$elegidos = $elegidos_x;
 
-					$permutacion1 = CursosController::permutacion($nombre1, $perturbada, $tieneLab1, $elegidos, 1);
+					$permutacion1 = CursosController::permutacion($nombre1, $perturbada, $tieneLab1, $elegidos, $cursos, 1);
 					if ($permutacion1['continue']) {
 						continue;
 					} else {
@@ -765,7 +755,7 @@ class CursosController extends Controller
 
 					if (isset($nombre2)) {
 
-						$permutacion2 = CursosController::permutacion($nombre2, $perturbada, $tieneLab2, $elegidos, 2);
+						$permutacion2 = CursosController::permutacion($nombre2, $perturbada, $tieneLab2, $elegidos, $cursos, 2);
 						if ($permutacion2['continue']) {
 							continue;
 						} else {
