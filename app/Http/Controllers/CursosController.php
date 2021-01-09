@@ -436,21 +436,28 @@ class CursosController extends Controller
 	public function contarHuecos($semana)
 	{
 		$posiciones = [];
-		$contador = 0;
-		$huecos = 0;
+		$huecos = [];
 
 		foreach ($semana as $dia => $horas) {
+
+			$contador = 0;
+			$posiciones[$dia] = [];
 			foreach ($horas as $hora => $nrc) {
 				$contador += 1;
 				if ($nrc) {
-					$posiciones[] = $contador;
+					$posiciones[$dia][] = $contador;
 				}
 			}
-		}
 
-		for ($i = $posiciones[0] + 1; $i < end($posiciones); $i++) {
-			if (!in_array($i, $posiciones)) {
-				$huecos += 1;
+			$huecos[$dia] = 0;
+			if (count($posiciones[$dia]) > 1) {
+				for ($i = $posiciones[$dia][0] + 1; $i < end($posiciones[$dia]); $i++) {
+					if (!in_array($i, $posiciones[$dia])) {
+						$huecos[$dia] += 1;
+					}
+				}
+			} else {
+				$huecos[$dia] = 0;
 			}
 		}
 		
@@ -807,9 +814,14 @@ class CursosController extends Controller
 					// 	}
 				}
 
-				$zx = CursosController::contarHuecos($semana);
-				$zxp = CursosController::contarHuecos($perturbada);
+				$huecos_zx = CursosController::contarHuecos($semana);
+				$huecos_zxp = CursosController::contarHuecos($perturbada);
+
+				$zx = array_sum($huecos_zx);
+				$zxp = array_sum($huecos_zxp);
 				
+				dd($zx, $semana, $zxp, $perturbada);
+
 				if ($zxp < $zx) {
 					$semana = $perturbada;
 				}
