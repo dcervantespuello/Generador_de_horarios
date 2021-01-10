@@ -272,12 +272,8 @@ class CursosController extends Controller
 		return $nombre;
 	}
 
-	public function permutacion($nombre, $perturbada, $tienelab, $elegidos, $cursos, $num)
+	public function permutacion($nombre, $perturbada, $tienelab, $cursos)
 	{
-		$resultado['continue'] = false;
-		$resultado['aceptado'] = false;
-		$resultado['perturbada'] = [];
-		$resultado['elegidos'] = [];
 		$listaNrc = $cursos[$nombre]['nrc'];
 		$aleatorio = array_rand(array_flip(array_keys($listaNrc)));
 		$listaDias = $listaNrc[$aleatorio]['dias'];
@@ -285,10 +281,9 @@ class CursosController extends Controller
 
 		if (substr($seccion, -1) == "1" or substr($seccion, -1) == "2") {
 			$resultado['continue'] = true;
-			return $resultado;
 		} else {
 
-			$aceptado1 = false;
+			$aceptado = false;
 			$ultimo_dia = CursosController::endKey($listaDias, 2);
 
 			foreach ($listaDias as $dia => $infoDia) {
@@ -301,10 +296,10 @@ class CursosController extends Controller
 
 				if ($valido) {
 					if ($dia == $ultimo_dia) {
-						$aceptado1 = true;
-						if (!$tienelab) {
-							$elegidos[] = $aleatorio;
-						}
+						$aceptado = true;
+						// if (!$tienelab) {
+						// 	$elegidos[] = $aleatorio;
+						// }
 					}
 				} else {
 					foreach ($perturbada as $day => $hours) {
@@ -318,7 +313,7 @@ class CursosController extends Controller
 				}
 			}
 
-			if ($aceptado1) {
+			if ($aceptado) {
 				if ($tienelab) {
 					$nrc_labs = [];
 
@@ -421,16 +416,15 @@ class CursosController extends Controller
 						return $resultado;
 					}
 				}
-
+				$resultado['continue'] = false;
 				$resultado['aceptado'] = true;
 				$resultado['perturbada'] = $perturbada;
-				$resultado['elegidos'] = $elegidos;
-				return $resultado;
+				$resultado['aleatorio'] = $aleatorio;
 			} else {
 				$resultado['continue'] = true;
-				return $resultado;
 			}
 		}
+		return $resultado;
 	}
 
 	public function contarHuecos($semana)
@@ -460,7 +454,7 @@ class CursosController extends Controller
 				$huecos[$dia] = 0;
 			}
 		}
-		
+
 		return $huecos;
 	}
 
@@ -470,7 +464,7 @@ class CursosController extends Controller
 		$cursos = CursosController::obtenerCursos();
 		$semana = CursosController::obtenerSemana();
 		$laboratorios = CursosController::obtenerLabs();
-		$iteraciones = 500;
+		$iteraciones = 2;
 		$cruzados = [];
 		$elegidos = [];
 		$elegidos_labs = [];
@@ -674,8 +668,7 @@ class CursosController extends Controller
 		} else {
 			while ($iteraciones > 0) {
 
-				$semana_x = $semana;
-				$elegidos_x = $elegidos;
+				$perturbada = $semana;
 
 				while (true) {
 					if (count($elegidos) == 1) {
@@ -724,23 +717,23 @@ class CursosController extends Controller
 					// }
 				}
 
-				foreach ($semana_x as $dia => $horas) {
+				foreach ($perturbada as $dia => $horas) {
 
 					foreach ($horas as $hora => $nrc) {
 
 						if ($nrc == $nrc1) {
-							$semana_x[$dia][$hora] = '';
+							$perturbada[$dia][$hora] = '';
 						} elseif (isset($nrc2)) {
 							if ($nrc == $nrc2) {
-								$semana_x[$dia][$hora] = '';
+								$perturbada[$dia][$hora] = '';
 							}
 						} elseif (isset($nrc_labo1)) {
 							if ($nrc == $nrc_labo1) {
-								$semana_x[$dia][$hora] = '';
+								$perturbada[$dia][$hora] = '';
 							}
 						} elseif (isset($nrc_labo2)) {
 							if ($nrc == $nrc_labo2) {
-								$semana_x[$dia][$hora] = '';
+								$perturbada[$dia][$hora] = '';
 							}
 						}
 					}
@@ -748,43 +741,47 @@ class CursosController extends Controller
 
 				while (true) {
 
-					$perturbada = $semana_x;
-					$elegidos = $elegidos_x;
-
-					$permutacion1 = CursosController::permutacion($nombre1, $perturbada, $tieneLab1, $elegidos, $cursos, 1);
+					$permutacion1 = CursosController::permutacion($nombre1, $perturbada, $tieneLab1, $cursos);
 					if ($permutacion1['continue']) {
 						continue;
 					} else {
-						$aceptado1 = $permutacion1['aceptado'];
-						$perturbada = $permutacion1['perturbada'];
-						$elegidos = $permutacion1['elegidos'];
+						if ($permutacion1['aceptado']) {
+							$perturbada1 = $permutacion1['perturbada'];
+							$aleatorio1 = $permutacion1['aleatorio'];
+						} else {
+							continue;
+						}
 					}
 
 					if (isset($nombre2)) {
 
-						$permutacion2 = CursosController::permutacion($nombre2, $perturbada, $tieneLab2, $elegidos, $cursos, 2);
+						$permutacion2 = CursosController::permutacion($nombre2, $perturbada1, $tieneLab2, $cursos);
 						if ($permutacion2['continue']) {
 							continue;
 						} else {
-							$aceptado2 = $permutacion2['aceptado'];
-							$perturbada = $permutacion2['perturbada'];
-							$elegidos = $permutacion2['elegidos'];
+							if ($permutacion2['aceptado']) {
+								$perturbada = $permutacion2['perturbada'];
+								$aleatorio2 = $permutacion2['aleatorio'];
+							} else {
+								continue;
+							}
 						}
 					}
 
-					if (isset($aceptado2)) {
-						if ($aceptado1 and $aceptado2) {
-							break;
-						} else {
-							continue;
-						}
-					} else {
-						if ($aceptado1) {
-							break;
-						} else {
-							continue;
-						}
-					}
+					break;
+					// if (isset($aceptado2)) {
+					// 	if ($aceptado1 and $aceptado2) {
+					// 		break;
+					// 	} else {
+					// 		continue;
+					// 	}
+					// } else {
+					// 	if ($aceptado1) {
+					// 		break;
+					// 	} else {
+					// 		continue;
+					// 	}
+					// }
 				}
 
 				foreach ($elegidos as $i => $elegido) {
@@ -798,6 +795,9 @@ class CursosController extends Controller
 				}
 				$elegidos = array_values($elegidos);
 
+				$elegidos[] = $aleatorio1;
+				$elegidos[] = $aleatorio2;
+				
 				// Borramos los NRC viejos de los elegidos_labs
 				foreach ($elegidos_labs as $i => $elegido_lab) {
 
@@ -820,15 +820,15 @@ class CursosController extends Controller
 				$zx = array_sum($huecos_zx);
 				$zxp = array_sum($huecos_zxp);
 				
-				dd($zx, $semana, $zxp, $perturbada);
-
 				if ($zxp < $zx) {
 					$semana = $perturbada;
 				}
 
-				$iteraciones -= 500;
+				$iteraciones -= 1;
+				dd("NRC1: ".$nrc1, "NRC2: ".$nrc2, "Aleatorio1: ".$aleatorio1, "Aleatorio2: ".$aleatorio2, $elegidos, $semana, $perturbada);
 			}
 
+			// dd($elegidos, $semana, $perturbada);
 			// Agregando los nombres de los cursos
 			$definitivos = [];
 
