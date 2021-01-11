@@ -1,6 +1,17 @@
 @extends('layouts.app')
 
 @section('contenido')
+<div class="text-center">
+@foreach($sem as $key => $val)
+    <h1>Semana {{ $key + 1 }}</h1>
+    @foreach($val[0] as $key2 => $val2)
+        <p>{{ $val2 }}</p>
+    @endforeach
+    <p>NRC1: {{ $val[1] }}</p>
+    <p>ALEATORIO1: {{ $val[2] }}</p>
+@endforeach
+</div>
+
 <div class="container-fluid">
     <div class="row">
         <div class="col">
@@ -29,11 +40,11 @@
                         <td style="white-space:nowrap;">{{ $fila }}:00 - {{ $fila }}:50</td>
                         @foreach ($dias as $hora => $nrc)
 
-                        @if(empty($nrc))
-                        <td></td>
-                        @else
-                        <td>{{ $definitivos[$nrc] }} ({{ $nrc }})</td>
-                        @endif
+                            @if(empty($nrc))
+                            <td></td>
+                            @else
+                            <td>{{ $definitivos[$nrc] }} ({{ $nrc }})</td>
+                            @endif
 
                         @endforeach
                     </tr>
