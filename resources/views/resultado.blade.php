@@ -1,6 +1,18 @@
 @extends('layouts.app')
 
 @section('contenido')
+<!-- <div class="text-center">
+@foreach($sem as $key => $val)
+    <h1>Semana {{ $key + 1 }}</h1>
+    @foreach($val[0] as $key2 => $val2)
+        <p>{{ $val2 }}</p>
+    @endforeach
+    <p>NRC1: {{ $val[1] }}</p>
+    <p>NRC2: {{ $val[2] }}</p>
+    <p>ALEATORIO1: {{ $val[3] }}</p>
+    <p>ALEATORIO2: {{ $val[4] }}</p>
+@endforeach
+</div> -->
 
 <div class="container-fluid">
     <div class="row">

@@ -464,7 +464,7 @@ class CursosController extends Controller
 		$cursos = CursosController::obtenerCursos();
 		$semana = CursosController::obtenerSemana();
 		$laboratorios = CursosController::obtenerLabs();
-		$iteraciones = 2;
+		$iteraciones = 500;
 		$cruzados = [];
 		$elegidos = [];
 		$elegidos_labs = [];
@@ -649,6 +649,8 @@ class CursosController extends Controller
 			}
 		}
 
+		// En este punto ya tengo la semana inicial
+
 		if ($cruzados) {
 			$error = "Los NRC de los siguientes cursos se cruzan: ";
 
@@ -666,8 +668,8 @@ class CursosController extends Controller
 
 			return redirect()->back()->with('error', $error);
 		} else {
+			$semanas = [];
 			while ($iteraciones > 0) {
-
 				$perturbada = $semana;
 
 				while (true) {
@@ -769,35 +771,10 @@ class CursosController extends Controller
 					}
 
 					break;
-					// if (isset($aceptado2)) {
-					// 	if ($aceptado1 and $aceptado2) {
-					// 		break;
-					// 	} else {
-					// 		continue;
-					// 	}
-					// } else {
-					// 	if ($aceptado1) {
-					// 		break;
-					// 	} else {
-					// 		continue;
-					// 	}
-					// }
 				}
+				$semanas[] = [$semana, $nrc1, $nrc2, $aleatorio1, $aleatorio2];
 
-				foreach ($elegidos as $i => $elegido) {
-					if ($elegido == $nrc1) {
-						unset($elegidos[$i]);
-					} elseif (isset($nrc2)) {
-						if ($elegido == $nrc2) {
-							unset($elegidos[$i]);
-						}
-					}
-				}
-				$elegidos = array_values($elegidos);
 
-				$elegidos[] = $aleatorio1;
-				$elegidos[] = $aleatorio2;
-				
 				// Borramos los NRC viejos de los elegidos_labs
 				foreach ($elegidos_labs as $i => $elegido_lab) {
 
@@ -819,16 +796,30 @@ class CursosController extends Controller
 
 				$zx = array_sum($huecos_zx);
 				$zxp = array_sum($huecos_zxp);
-				
+
 				if ($zxp < $zx) {
+					foreach ($elegidos as $i => $elegido) {
+						if ($elegido == $nrc1) {
+							unset($elegidos[$i]);
+						} elseif (isset($nrc2)) {
+							if ($elegido == $nrc2) {
+								unset($elegidos[$i]);
+							}
+						}
+					}
+					$elegidos = array_values($elegidos);
+
+					$elegidos[] = $aleatorio1;
+					if (isset($aleatorio2)) {
+						$elegidos[] = $aleatorio2;
+					}
+
 					$semana = $perturbada;
 				}
 
 				$iteraciones -= 1;
-				dd("NRC1: ".$nrc1, "NRC2: ".$nrc2, "Aleatorio1: ".$aleatorio1, "Aleatorio2: ".$aleatorio2, $elegidos, $semana, $perturbada);
 			}
-
-			// dd($elegidos, $semana, $perturbada);
+			
 			// Agregando los nombres de los cursos
 			$definitivos = [];
 
@@ -852,7 +843,19 @@ class CursosController extends Controller
 				}
 			}
 
-			return view('resultado', ['cursos' => $cursos, 'filas' => $filas, 'definitivos' => $definitivos]);
+			$sem = [];
+			foreach ($semanas as $semana) {
+				$lista = [];
+				foreach ($semana[0] as $dia => $horas) {
+					foreach ($horas as $hora => $nrc) {
+						if (!empty($nrc) and !in_array($nrc, $lista)) {
+							$lista[] = $nrc;
+						}
+					}
+				}
+				$sem[] = [$lista, $semana[1], $semana[2], $semana[3], $semana[4]];
+			}
+			return view('resultado', ['cursos' => $cursos, 'filas' => $filas, 'definitivos' => $definitivos, 'sem' => $sem]);
 		}
 	}
 }
