@@ -649,8 +649,6 @@ class CursosController extends Controller
 			}
 		}
 
-		// En este punto ya tengo la semana inicial
-
 		if ($cruzados) {
 			$error = "Los NRC de los siguientes cursos se cruzan: ";
 
@@ -668,7 +666,6 @@ class CursosController extends Controller
 
 			return redirect()->back()->with('error', $error);
 		} else {
-			$semanas = [];
 			while ($iteraciones > 0) {
 				$perturbada = $semana;
 
@@ -772,8 +769,6 @@ class CursosController extends Controller
 
 					break;
 				}
-				$semanas[] = [$semana, $nrc1, $nrc2, $aleatorio1, $aleatorio2];
-
 
 				// Borramos los NRC viejos de los elegidos_labs
 				foreach ($elegidos_labs as $i => $elegido_lab) {
@@ -819,43 +814,21 @@ class CursosController extends Controller
 
 				$iteraciones -= 1;
 			}
-			
-			// Agregando los nombres de los cursos
+
 			$definitivos = [];
-
-			foreach ($semana as $dia => $horas) {
-				foreach ($horas as $hora => $nrc) {
-					if (!empty($nrc) and !in_array($nrc, $definitivos)) {
-						$name = DB::select('select * from cursos where Nrc = "' . $nrc . '" limit 1');
-						$name = $name[0]->Nombre_asignatura;
-
-						$definitivos[$nrc] = $name;
-					}
-				}
+			foreach ($elegidos as $elegido) {
+				$nombre = CursosController::nombreNrc($elegido);
+				$definitivos[$elegido] = $nombre;
 			}
 
-			// Ordenando para mostrar horario generado
 			$filas = [];
-
 			for ($i = 7; $i <= 20; $i++) {
 				foreach ($semana as $dia => $horas) {
 					$filas[$i][] = $semana[$dia][$i];
 				}
 			}
 
-			$sem = [];
-			foreach ($semanas as $semana) {
-				$lista = [];
-				foreach ($semana[0] as $dia => $horas) {
-					foreach ($horas as $hora => $nrc) {
-						if (!empty($nrc) and !in_array($nrc, $lista)) {
-							$lista[] = $nrc;
-						}
-					}
-				}
-				$sem[] = [$lista, $semana[1], $semana[2], $semana[3], $semana[4]];
-			}
-			return view('resultado', ['cursos' => $cursos, 'filas' => $filas, 'definitivos' => $definitivos, 'sem' => $sem]);
+			return view('resultado', ['cursos' => $cursos, 'filas' => $filas, 'definitivos' => $definitivos]);
 		}
 	}
 }
