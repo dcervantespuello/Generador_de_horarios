@@ -666,7 +666,7 @@ class CursosController extends Controller
 
 			return redirect()->back()->with('error', $error);
 		} else {
-			$semanas = [];
+			// $semanas = [];
 			while ($iteraciones > 0) {
 				$perturbada = $semana;
 
@@ -746,7 +746,11 @@ class CursosController extends Controller
 						continue;
 					} else {
 						if ($permutacion1['aceptado']) {
-							$perturbada1 = $permutacion1['perturbada'];
+							if (!isset($nombre2)) {
+								$perturbada = $permutacion1['perturbada'];
+							} else {
+								$perturbada1 = $permutacion1['perturbada'];
+							}
 							$aleatorio1 = $permutacion1['aleatorio'];
 						} else {
 							continue;
@@ -770,7 +774,7 @@ class CursosController extends Controller
 
 					break;
 				}
-				$semanas[] = [$semana, $nrc1, $aleatorio1];
+				// $semanas[] = [$semana, $nrc1, $aleatorio1];
 
 				// Borramos los NRC viejos de los elegidos_labs
 				foreach ($elegidos_labs as $i => $elegido_lab) {
@@ -831,18 +835,18 @@ class CursosController extends Controller
 			}
 
 			$sem = [];
-			foreach ($semanas as $semana) {
-				$lista = [];
-				foreach ($semana[0] as $dia => $horas) {
-					foreach ($horas as $hora => $nrc) {
-						if (!empty($nrc) and !in_array($nrc, $lista)) {
-							$lista[] = $nrc;
-						}
-					}
-				}
-				$sem[] = [$lista, $semana[1], $semana[2]];
-			}
-			return view('resultado', ['cursos' => $cursos, 'filas' => $filas, 'definitivos' => $definitivos, 'sem' => $sem]);
+			// foreach ($semanas as $semana) {
+			// 	$lista = [];
+			// 	foreach ($semana[0] as $dia => $horas) {
+			// 		foreach ($horas as $hora => $nrc) {
+			// 			if (!empty($nrc) and !in_array($nrc, $lista)) {
+			// 				$lista[] = $nrc;
+			// 			}
+			// 		}
+			// 	}
+			// 	$sem[] = [$lista, $semana[1], $semana[2]];
+			// }
+		return view('resultado', ['cursos' => $cursos, 'filas' => $filas, 'definitivos' => $definitivos, 'sem' => $sem]);
 		}
 	}
 }
