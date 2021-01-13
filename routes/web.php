@@ -16,3 +16,5 @@ use Illuminate\Support\Facades\Route;
 Route::get('/', 'CursosController@index')->name('index');
 
 Route::post('/hill_climbing','CursosController@hill_climbing')->name('hill_climbing');
+
+Route::post('/simulated_annealing','CursosController@simulated_annealing')->name('simulated_annealing');

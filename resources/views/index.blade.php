@@ -54,7 +54,7 @@
                     <p id='lista' style="text-align:center;" class='my-auto'></p>
                 </strong>
             </div>
-            <form action="{{ route('hill_climbing') }}" method="post">
+            <form action="{{ route('simulated_annealing') }}" method="post">
                 @csrf
                 <table class="table table-hover" id='seleccionados'>
                     <thead>
