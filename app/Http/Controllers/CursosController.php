@@ -1060,7 +1060,7 @@ class CursosController extends Controller
 			return redirect()->back()->with('error', $error);
 		} else {
 			// $semanas = [];
-			while ($temperatura > 0) {
+			while ($temperatura > 0.1) {
 				$perturbada = $semana;
 
 				while (true) {
