@@ -464,10 +464,11 @@ class CursosController extends Controller
 		$cursos = CursosController::obtenerCursos();
 		$semana = CursosController::obtenerSemana();
 		$laboratorios = CursosController::obtenerLabs();
-		$iteraciones = 500;
+		$iteraciones = 5000;
 		$cruzados = [];
 		$elegidos = [];
 		$elegidos_labs = [];
+		$start = microtime(true);
 
 		foreach ($nombres as $nombre) {
 
@@ -667,6 +668,7 @@ class CursosController extends Controller
 			return redirect()->back()->with('error', $error);
 		} else {
 			// $semanas = [];
+			$huequillos = [];
 			while ($iteraciones > 0) {
 				$perturbada = $semana;
 
@@ -815,12 +817,16 @@ class CursosController extends Controller
 						$elegidos[] = $aleatorio2;
 					}
 
+					$huequillos[] = $zxp;
+
 					$semana = $perturbada;
 				}
 
 				$iteraciones -= 1;
 			}
-
+			$end = microtime(true);
+			$time = $end-$start;
+			dd($time, $huequillos);
 			$definitivos = [];
 			foreach ($elegidos as $elegido) {
 				$nombre = CursosController::nombreNrc($elegido);
@@ -861,6 +867,7 @@ class CursosController extends Controller
 		$cruzados = [];
 		$elegidos = [];
 		$elegidos_labs = [];
+		$start = microtime(true);
 
 		foreach ($nombres as $nombre) {
 
@@ -1060,6 +1067,7 @@ class CursosController extends Controller
 			return redirect()->back()->with('error', $error);
 		} else {
 			// $semanas = [];
+			// $huequillos = [];
 			while ($temperatura > 0.1) {
 				$perturbada = $semana;
 
@@ -1208,6 +1216,8 @@ class CursosController extends Controller
 						$elegidos[] = $aleatorio2;
 					}
 
+					$huequillos[] = $zxp;
+
 					$semana = $perturbada;
 					$temperatura *= $alfa;
 				} else {
@@ -1234,12 +1244,16 @@ class CursosController extends Controller
 							$elegidos[] = $aleatorio2;
 						}
 
+						$huequillos[] = $zxp;
+
 						$semana = $perturbada;
 						$temperatura *= $alfa;
 					}
 				}
 			}
-
+			$end = microtime(true);
+			$time = $end-$start;
+			dd($time, $huequillos);
 			$definitivos = [];
 			foreach ($elegidos as $elegido) {
 				$nombre = CursosController::nombreNrc($elegido);
