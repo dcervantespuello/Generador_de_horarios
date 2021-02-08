@@ -826,7 +826,7 @@ class CursosController extends Controller
 			}
 			$end = microtime(true);
 			$time = $end-$start;
-			dd($time, $huequillos);
+			// dd($time, $huequillos);
 			$definitivos = [];
 			foreach ($elegidos as $elegido) {
 				$nombre = CursosController::nombreNrc($elegido);
@@ -1253,7 +1253,7 @@ class CursosController extends Controller
 			}
 			$end = microtime(true);
 			$time = $end-$start;
-			dd($time, $huequillos);
+			// dd($time, $huequillos);
 			$definitivos = [];
 			foreach ($elegidos as $elegido) {
 				$nombre = CursosController::nombreNrc($elegido);

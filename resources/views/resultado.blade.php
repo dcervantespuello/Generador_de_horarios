@@ -15,15 +15,15 @@
 <div class="container-fluid">
     <div class="row">
         <div class="col">
-            <h1>¡Felicidades!</h1>
-            <h3>Su horario de clases fue creado con éxito</h3>
+            <h1>¡Felicitaciones!</h1>
+            <h3>Su horario fue generado con éxito</h3>
         </div>
     </div>
     <div class="row">
         <div class="col">
-            <table class="table table-bordered table-sm" id="generado">
+            <table class="table table-bordered table-sm text-white" id="generado">
                 <thead>
-                    <tr>
+                    <tr style="background-color: #2196f399;">
                         <th>Hora</th>
                         <th>Lunes</th>
                         <th>Martes</th>

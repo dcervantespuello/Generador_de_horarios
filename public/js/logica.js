@@ -140,7 +140,9 @@ function quitar(nombre, creditos) {
 
 $(document).ready(function() {
     $('#cursos').DataTable({
-        language: idioma_espanol
+        language: idioma_espanol,
+        responsive: true,
+        dom: "frt"
     });
 });
 

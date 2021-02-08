@@ -1,5 +1,50 @@
-th,
-td {
+/* @media (max-width: 564px) {
+    .columnita {
+        display: none;
+    }
+} */
+
+.btn-success {
+    color: #fff;
+    background-color: #009688;
+    border-color: #28a745;
+}
+
+.btn-danger {
+    color: #fff;
+    background-color: #e83e8cd9;
+    border-color: #dc3545;
+}
+
+#t_seleccion {
+    font-size: 32.5px;
+}
+
+table td {
+    word-wrap: break-word;
+    text-align: center;
+}
+
+.nombre {
+    color: white;
+}
+
+#cursos {
+    color: white;
+}
+
+#seleccionados {
+    color: white;
+}
+
+body {
+    background-color: #2E3192;
+    color: white;
+    /* font-family:'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif; */
+    font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
+}
+
+th {
     text-align: center;
 }
 
@@ -36,8 +81,6 @@ h1 {
     display: none;
 }
 
-.sorting,
-.sorting_asc,
-.sorting_desc {
+.sorting, .sorting_asc, .sorting_desc {
     text-align: center;
 }

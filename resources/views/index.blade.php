@@ -8,13 +8,13 @@
             <!-- <h1>HORARIOS UTB</h1> -->
         </div>
     </div>
-    <div class="row">
-        <div class="col-6">
+    <div class="row mt-3">
+        <div class="col-lg-7">
             <!-- <div class="form-group">
                 <input type="text" class="form-control pull-right" id="buscador"
                     placeholder="Escribe el nombre del curso que quieras agregar a tu horario.">
             </div> -->
-            <table class="table table-hover" id="cursos">
+            <table class="table" width="100%" id="cursos">
                 <thead>
                     <tr>
                         <th>Nombre del curso</th>
@@ -40,8 +40,8 @@
                 </tbody>
             </table>
         </div>
-        <div class="col-6">
-            <h3>CURSOS SELECCIONADOS</h3>
+        <div class="col-lg-5 mt-4 mt-lg-0">
+            <h3 id="t_seleccion">CURSOS SELECCIONADOS</h3>
             @if (session('error'))
             <div class="alert alert-danger">
                 <strong>
@@ -56,7 +56,7 @@
             </div>
             <form action="{{ route('simulated_annealing') }}" method="post">
                 @csrf
-                <table class="table table-hover" id='seleccionados'>
+                <table class="table" id='seleccionados'>
                     <thead>
                         <tr>
                             <th>Nombre de curso</th>
@@ -76,7 +76,7 @@
                 </table>
                 <p id="fila_cero">¡No hay cursos seleccionados!</p>
                 <div class="row justify-content-center">
-                    <div class="col">
+                    <div class="col mb-3">
                         <button type="submit" class="btn btn-primary btn-block btn-lg" id="enviar">Generar mi
                             Horario</button>
                     </div>
