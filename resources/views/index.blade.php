@@ -54,7 +54,7 @@
                     <p id='lista' style="text-align:center;" class='my-auto'></p>
                 </strong>
             </div>
-            <form action="{{ route('simulated_annealing') }}" method="post">
+            <form action="{{ route('ant_colony') }}" method="post">
                 @csrf
                 <table class="table" id='seleccionados'>
                     <thead>
