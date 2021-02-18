@@ -455,7 +455,7 @@ class CursosController extends Controller
 		return $feromonas;
 	}
 
-	function shuffle_assoc(&$array)
+	public function shuffle_assoc($array)
 	{
 		$keys = array_keys($array);
 
@@ -468,6 +468,41 @@ class CursosController extends Controller
 		$array = $new;
 
 		return true;
+	}
+
+	public function aumentarFeromonas($elegidos, $distancias, $feromonas)
+	{
+		$costoTour = 0;
+
+		for ($i = 0; $i < count($elegidos); $i++) {
+
+			$nrc_actual = $elegidos[$i];
+
+			if (end($elegidos) == $nrc_actual) {
+				$nrc_siguiente = $elegidos[0];
+			} else {
+				$nrc_siguiente = $elegidos[$i + 1];
+			}
+
+			$costoTour += $distancias[$nrc_actual][$nrc_siguiente];
+		}
+
+		for ($i = 0; $i < count($elegidos); $i++) {
+
+			$nrc_actual = $elegidos[$i];
+
+			if (end($elegidos) == $nrc_actual) {
+				$nrc_siguiente = $elegidos[0];
+			} else {
+				$nrc_siguiente = $elegidos[$i + 1];
+			}
+
+			if ($costoTour != 0) {
+				$feromonas[$nrc_actual][$nrc_siguiente] += 1 / $costoTour;
+			}
+		}
+
+		return $feromonas;
 	}
 
 	public function hill_climbing(Request $request)
@@ -1025,36 +1060,8 @@ class CursosController extends Controller
 			// $semanas = [];
 			$huequillos = [];
 
-			$costoTour = 0;
+			$feromonas = CursosController::aumentarFeromonas($elegidos, $distancias, $feromonas);
 
-			for ($i = 0; $i < count($elegidos); $i++) {
-
-				$nrc_actual = $elegidos[$i];
-
-				if (end($elegidos) == $nrc_actual) {
-					$nrc_siguiente = $elegidos[0];
-				} else {
-					$nrc_siguiente = $elegidos[$i + 1];
-				}
-
-				$costoTour += $distancias[$nrc_actual][$nrc_siguiente];
-			}
-
-			for ($i = 0; $i < count($elegidos); $i++) {
-
-				$nrc_actual = $elegidos[$i];
-
-				if (end($elegidos) == $nrc_actual) {
-					$nrc_siguiente = $elegidos[0];
-				} else {
-					$nrc_siguiente = $elegidos[$i + 1];
-				}
-
-				if ($costoTour != 0) {
-					$feromonas[$nrc_actual][$nrc_siguiente] += 1 / $costoTour;
-				}
-			}
-			
 			while ($iteraciones > 0) {
 				$perturbada = $semana;
 
@@ -1126,38 +1133,29 @@ class CursosController extends Controller
 					break;
 				}
 				// $semanas[] = [$semana, $nrc1, $aleatorio1];
-
-
-				$huecos_zx = CursosController::contarHuecos($semana);
-				$huecos_zxp = CursosController::contarHuecos($perturbada);
-
-				$zx = array_sum($huecos_zx);
-				$zxp = array_sum($huecos_zxp);
-
-				if ($zxp < $zx) {
-					foreach ($elegidos as $i => $elegido) {
-						if ($elegido == $nrc1) {
+				
+				foreach ($elegidos as $i => $elegido) {
+					if ($elegido == $nrc1) {
+						unset($elegidos[$i]);
+					} elseif (isset($nrc2)) {
+						if ($elegido == $nrc2) {
 							unset($elegidos[$i]);
-						} elseif (isset($nrc2)) {
-							if ($elegido == $nrc2) {
-								unset($elegidos[$i]);
-							}
 						}
 					}
-					$elegidos = array_values($elegidos);
-
-					$elegidos[] = $aleatorio1;
-					if (isset($aleatorio2)) {
-						$elegidos[] = $aleatorio2;
-					}
-
-					$huequillos[] = $zxp;
-
-					$semana = $perturbada;
 				}
+				$elegidos = array_values($elegidos);
+
+				$elegidos[] = $aleatorio1;
+				if (isset($aleatorio2)) {
+					$elegidos[] = $aleatorio2;
+				}
+
+				$feromonas = CursosController::aumentarFeromonas($elegidos, $distancias, $feromonas);
+				$semana = $perturbada;
 
 				$iteraciones -= 1;
 			}
+			dd($feromonas);
 			$end = microtime(true);
 			$time = $end - $start;
 			// dd($time, $huequillos);
