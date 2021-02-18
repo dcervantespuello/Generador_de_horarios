@@ -455,6 +455,21 @@ class CursosController extends Controller
 		return $feromonas;
 	}
 
+	function shuffle_assoc(&$array)
+	{
+		$keys = array_keys($array);
+
+		shuffle($keys);
+
+		foreach ($keys as $key) {
+			$new[$key] = $array[$key];
+		}
+
+		$array = $new;
+
+		return true;
+	}
+
 	public function hill_climbing(Request $request)
 	{
 		$nombres = $request->input('nombres');
@@ -989,7 +1004,7 @@ class CursosController extends Controller
 				}
 			}
 		}
-		dd($elegidos);
+
 		if ($cruzados) {
 			$error = "Los NRC de los siguientes cursos se cruzan: ";
 
@@ -1009,6 +1024,37 @@ class CursosController extends Controller
 		} else {
 			// $semanas = [];
 			$huequillos = [];
+
+			$costoTour = 0;
+
+			for ($i = 0; $i < count($elegidos); $i++) {
+
+				$nrc_actual = $elegidos[$i];
+
+				if (end($elegidos) == $nrc_actual) {
+					$nrc_siguiente = $elegidos[0];
+				} else {
+					$nrc_siguiente = $elegidos[$i + 1];
+				}
+
+				$costoTour += $distancias[$nrc_actual][$nrc_siguiente];
+			}
+
+			for ($i = 0; $i < count($elegidos); $i++) {
+
+				$nrc_actual = $elegidos[$i];
+
+				if (end($elegidos) == $nrc_actual) {
+					$nrc_siguiente = $elegidos[0];
+				} else {
+					$nrc_siguiente = $elegidos[$i + 1];
+				}
+
+				if ($costoTour != 0) {
+					$feromonas[$nrc_actual][$nrc_siguiente] += 1 / $costoTour;
+				}
+			}
+			
 			while ($iteraciones > 0) {
 				$perturbada = $semana;
 
