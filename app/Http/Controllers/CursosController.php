@@ -553,6 +553,17 @@ class CursosController extends Controller
 		return $feromonas;
 	}
 
+	public function evaporarFeromonas($feromonas)
+	{
+		foreach ($feromonas as $nrc => $puntos) {
+			foreach ($puntos as $punto => $feromona) {
+				$feromonas[$nrc][$punto] *= 0.9;
+			}
+		}
+
+		return $feromonas;
+	}
+
 	public function hill_climbing(Request $request)
 	{
 		$nombres = $request->input('nombres');
@@ -1033,6 +1044,7 @@ class CursosController extends Controller
 		$cruzados = [];
 		$elegidos = [];
 		$start = microtime(true);
+		$resultados = [];
 
 		foreach ($nombres as $nombre) {
 
@@ -1333,13 +1345,45 @@ class CursosController extends Controller
 						}
 					}
 				}
-				
+
 				$feromonas = CursosController::aumentarFeromonas($elegidos, $distancias, $feromonas);
+				$feromonas = CursosController::evaporarFeromonas($feromonas);
+				// dd($elegidos, $nombresX, $semana, $feromonas);
 
-				dd($elegidos, $nombresX, $semana, $feromonas);
+				$costoTour = 0;
 
+				for ($i = 0; $i < count($elegidos); $i++) {
+
+					$nrc_actual = $elegidos[$i];
+
+					if (end($elegidos) == $nrc_actual) {
+						$nrc_siguiente = $elegidos[0];
+					} else {
+						$nrc_siguiente = $elegidos[$i + 1];
+					}
+
+					$costoTour += $distancias[$nrc_actual][$nrc_siguiente];
+				}
+
+				$resultados[] = ['costo' => $costoTour, 'elegidos' => $elegidos];
+
+				$repeticiones -= 1;
 			}
 
+			foreach ($resultados as $resultado) {
+				if (!isset($actual)) {
+					$actual = $resultado['costo'];
+					$elegidos = $resultado['elegidos'];
+				} else {
+					$nuevo = $resultado['costo'];
+
+					if ($nuevo < $actual) {
+						$actual = $nuevo;
+						$elegidos = $resultado['elegidos'];
+					}
+				}
+			}
+			dd($actual, $elegidos);
 			$end = microtime(true);
 			$time = $end - $start;
 			// dd($time, $huequillos);
