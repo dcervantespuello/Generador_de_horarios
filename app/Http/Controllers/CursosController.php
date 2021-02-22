@@ -1365,7 +1365,7 @@ class CursosController extends Controller
 					$costoTour += $distancias[$nrc_actual][$nrc_siguiente];
 				}
 
-				$resultados[] = ['costo' => $costoTour, 'elegidos' => $elegidos];
+				$resultados[] = ['costo' => $costoTour, 'elegidos' => $elegidos, 'semana' => $semana];
 
 				$repeticiones -= 1;
 			}
@@ -1374,16 +1374,18 @@ class CursosController extends Controller
 				if (!isset($actual)) {
 					$actual = $resultado['costo'];
 					$elegidos = $resultado['elegidos'];
+					$semana = $resultado['semana'];
 				} else {
 					$nuevo = $resultado['costo'];
 
 					if ($nuevo < $actual) {
 						$actual = $nuevo;
 						$elegidos = $resultado['elegidos'];
+						$semana = $resultado['semana'];
 					}
 				}
 			}
-			dd($actual, $elegidos);
+			
 			$end = microtime(true);
 			$time = $end - $start;
 			// dd($time, $huequillos);
