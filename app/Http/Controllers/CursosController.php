@@ -527,7 +527,7 @@ class CursosController extends Controller
 			$nrc_actual = $elegidos[$i];
 
 			if (end($elegidos) == $nrc_actual) {
-				$nrc_siguiente = $elegidos[0];
+				break;
 			} else {
 				$nrc_siguiente = $elegidos[$i + 1];
 			}
@@ -540,7 +540,7 @@ class CursosController extends Controller
 			$nrc_actual = $elegidos[$i];
 
 			if (end($elegidos) == $nrc_actual) {
-				$nrc_siguiente = $elegidos[0];
+				break;
 			} else {
 				$nrc_siguiente = $elegidos[$i + 1];
 			}
@@ -1356,16 +1356,21 @@ class CursosController extends Controller
 				$arrayHuecos = CursosController::contarHuecos($semana);
 				$huecosNuevos = array_sum($arrayHuecos);
 
-				if (count($elegidos) == $numero_elegidos) {
-					if ($huecos == 0) {
-						$huecos = $huecosNuevos;
-						$elegidos_def = $elegidos;
-						$semana_def = $semana;
-					} elseif ($huecosNuevos < $huecos) {
-						$huecos = $huecosNuevos;
-						$elegidos_def = $elegidos;
-						$semana_def = $semana;
+				if ($numero_elegidos != 1) {
+					if (count($elegidos) == $numero_elegidos) {
+						if ($huecos == 0) {
+							$huecos = $huecosNuevos;
+							$elegidos_def = $elegidos;
+							$semana_def = $semana;
+						} elseif ($huecosNuevos < $huecos) {
+							$huecos = $huecosNuevos;
+							$elegidos_def = $elegidos;
+							$semana_def = $semana;
+						}
 					}
+				} else {
+					$elegidos_def = $elegidos;
+					$semana_def = $semana;
 				}
 
 				$repeticiones -= 1;
