@@ -1039,12 +1039,16 @@ class CursosController extends Controller
 		$locales = CursosController::obtenerHeuristicasLocales($distancias);
 		$feromonas = CursosController::obtenerMatrizFeromonas($distancias);
 		$semana = CursosController::obtenerSemana();
-		$iteraciones = 5000;
-		$repeticiones = 5000;
+		$iteraciones = 10000;
+		$repeticiones = 10000;
 		$cruzados = [];
 		$elegidos = [];
 		$start = microtime(true);
 		$resultados = [];
+		$numero_elegidos = count($nombres);
+		$huecos = 0;
+		$elegidos_def = [];
+		$semana_def = [];
 
 		foreach ($nombres as $nombre) {
 
@@ -1348,44 +1352,29 @@ class CursosController extends Controller
 
 				$feromonas = CursosController::aumentarFeromonas($elegidos, $distancias, $feromonas);
 				$feromonas = CursosController::evaporarFeromonas($feromonas);
-				// dd($elegidos, $nombresX, $semana, $feromonas);
 
-				$costoTour = 0;
+				$arrayHuecos = CursosController::contarHuecos($semana);
+				$huecosNuevos = array_sum($arrayHuecos);
 
-				for ($i = 0; $i < count($elegidos); $i++) {
-
-					$nrc_actual = $elegidos[$i];
-
-					if (end($elegidos) == $nrc_actual) {
-						$nrc_siguiente = $elegidos[0];
-					} else {
-						$nrc_siguiente = $elegidos[$i + 1];
+				if (count($elegidos) == $numero_elegidos) {
+					if ($huecos == 0) {
+						$huecos = $huecosNuevos;
+						$elegidos_def = $elegidos;
+						$semana_def = $semana;
+					} elseif ($huecosNuevos < $huecos) {
+						$huecos = $huecosNuevos;
+						$elegidos_def = $elegidos;
+						$semana_def = $semana;
 					}
-
-					$costoTour += $distancias[$nrc_actual][$nrc_siguiente];
 				}
-
-				$resultados[] = ['costo' => $costoTour, 'elegidos' => $elegidos, 'semana' => $semana];
 
 				$repeticiones -= 1;
 			}
 
-			foreach ($resultados as $resultado) {
-				if (!isset($actual)) {
-					$actual = $resultado['costo'];
-					$elegidos = $resultado['elegidos'];
-					$semana = $resultado['semana'];
-				} else {
-					$nuevo = $resultado['costo'];
+			$semana = $semana_def;
+			$elegidos = $elegidos_def;
+			// dd($huecos, $elegidos, $semana);
 
-					if ($nuevo < $actual) {
-						$actual = $nuevo;
-						$elegidos = $resultado['elegidos'];
-						$semana = $resultado['semana'];
-					}
-				}
-			}
-			
 			$end = microtime(true);
 			$time = $end - $start;
 			// dd($time, $huequillos);
