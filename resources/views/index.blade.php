@@ -3,9 +3,12 @@
 @section('contenido')
 
 <div class="container-fluid">
-    <div class="row">
-        <div class="col">
-            <!-- <h1>HORARIOS UTB</h1> -->
+    <div class="row justify-content-center mt-3">
+        <div class="col-1 mr-5">
+            <img src="{{ asset('img/logo.png') }}" alt="logo_horarios_utb" style="width: 150px;">
+        </div>
+        <div class="col-4">
+            <h1 class="mt-4" style="font-size: 70px;">HORARIOS UTB</h1>
         </div>
     </div>
     <div class="row mt-3">
@@ -33,8 +36,7 @@
                     <tr>
                         <td>{{ $nombre }}</td>
                         <td>{{ $curso['creditos'] }}</td>
-                        <td><input class="btn btn-success btn-agregar" type="button" value="Agregar"
-                                onclick='agregar("{{ $nombre }}", "{{ $creditos }}")'></td>
+                        <td><input class="btn btn-success btn-agregar" type="button" value="Agregar" onclick='agregar("{{ $nombre }}", "{{ $creditos }}")'></td>
                     </tr>
                     @endforeach
                 </tbody>
@@ -54,7 +56,7 @@
                     <p id='lista' style="text-align:center;" class='my-auto'></p>
                 </strong>
             </div>
-            <form action="{{ route('ant_colony') }}" method="post">
+            <form action="{{ route($meta) }}" method="post">
                 @csrf
                 <table class="table" id='seleccionados'>
                     <thead>

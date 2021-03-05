@@ -13,8 +13,29 @@ class CursosController extends Controller
 	{
 		// Obteniendo los cursos de la base de datos
 		$cursos = CursosController::obtenerCursos();
+		$n = (float)rand() / (float)getrandmax();
+		$n = (int)round($n * 3);
 
-		return view('index', ['cursos' => $cursos]);
+		while ($n != 1 and $n != 2 and $n != 3) {
+			$n = (float)rand() / (float)getrandmax();
+			$n = (int)round($n * 3);
+		}
+
+		switch ($n) {
+			case 1:
+				$meta = 'hill_climbing';
+				break;
+
+			case 2:
+				$meta = 'simulated_annealing';
+				break;
+
+			case 3:
+				$meta = 'ant_colony';
+				break;
+		}
+
+		return view('index', ['cursos' => $cursos, 'n' => $n, 'meta' => $meta]);
 	}
 
 	public function obtenerCursos()

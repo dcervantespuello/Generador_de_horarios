@@ -142,7 +142,7 @@ $(document).ready(function() {
     $('#cursos').DataTable({
         language: idioma_espanol,
         responsive: true,
-        dom: "frt"
+        // dom: "frtpi"
     });
 });
 
