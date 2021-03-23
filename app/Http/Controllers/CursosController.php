@@ -35,7 +35,7 @@ class CursosController extends Controller
 				break;
 		}
 
-		return view('index', ['cursos' => $cursos, 'n' => $n, 'meta' => $meta]);
+		return view('home', ['cursos' => $cursos, 'n' => $n, 'meta' => $meta]);
 	}
 
 	public function obtenerCursos()

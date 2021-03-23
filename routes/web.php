@@ -13,10 +13,17 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::get('/', 'CursosController@index')->name('index');
+// Login para los estudiantes
+Route::get('/', function () {
+    return view('auth.login');
+});
 
-Route::post('/hill_climbing','CursosController@hill_climbing')->name('hill_climbing');
+Route::get('/home', 'CursosController@index')->name('index');
 
-Route::post('/simulated_annealing','CursosController@simulated_annealing')->name('simulated_annealing');
+Route::post('/hill_climbing', 'CursosController@hill_climbing')->name('hill_climbing');
 
-Route::post('/ant_colony','CursosController@ant_colony')->name('ant_colony');
+Route::post('/simulated_annealing', 'CursosController@simulated_annealing')->name('simulated_annealing');
+
+Route::post('/ant_colony', 'CursosController@ant_colony')->name('ant_colony');
+
+Auth::routes();

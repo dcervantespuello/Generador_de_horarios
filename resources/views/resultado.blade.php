@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('contenido')
+@section('content')
 <!-- <div class="text-center">
 @foreach($sem as $key => $val)
     <h1>Semana {{ $key + 1 }}</h1>
@@ -23,7 +23,7 @@
         <div class="col">
             <table class="table table-bordered table-sm text-white" id="generado">
                 <thead>
-                    <tr style="background-color: #2196f399;">
+                    <tr style="background-color: #2D52A8;">
                         <th>Hora</th>
                         <th>Lunes</th>
                         <th>Martes</th>

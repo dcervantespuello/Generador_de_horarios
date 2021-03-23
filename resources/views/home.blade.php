@@ -1,6 +1,8 @@
 @extends('layouts.app')
 
-@section('contenido')
+@section('content')
+
+
 
 <div class="container-fluid">
     <div class="row justify-content-center mt-3">
@@ -87,5 +89,12 @@
         </div>
     </div>
 </div>
+
+<script src="https://code.jquery.com/jquery-3.5.1.js"></script>
+<script src="https://cdn.datatables.net/1.10.23/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/1.10.23/js/dataTables.bootstrap4.min.js"></script>
+<script src="https://cdn.datatables.net/responsive/2.2.7/js/dataTables.responsive.min.js"></script>
+<script src="https://cdn.datatables.net/responsive/2.2.7/js/responsive.bootstrap4.min.js"></script>
+<script src="{{ asset('js/logica.js') }}"></script>
 
 @endsection
