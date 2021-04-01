@@ -585,9 +585,56 @@ class CursosController extends Controller
 		return $feromonas;
 	}
 
+	public function consultarPrerequisitos($elegidos)
+	{
+		$invalidos = [];
+		$cadena = auth()->user()->aprobados;
+		$aprobados = explode(",", $cadena);
+
+		foreach ($elegidos as $elegido) {
+			$tienePrerequisitos = DB::select("select * from prerequisitos where nombre = '$elegido'");
+			if ($tienePrerequisitos) {
+				$cadena = $tienePrerequisitos[0]->prerequisitos;
+				$prerequisitos = explode(",", $cadena);
+				$noAprobados = [];
+				foreach ($prerequisitos as $prerequisito) {
+					if (!in_array($prerequisito, $aprobados)) {
+						$noAprobados[] = $prerequisito;
+					}
+				}
+				if ($noAprobados) {
+					$invalidos[] = [$elegido, $noAprobados];
+				}
+			}
+		}
+
+		return $invalidos;
+	}
+
 	public function hill_climbing(Request $request)
 	{
 		$nombres = $request->input('nombres');
+		$invalidos = CursosController::consultarPrerequisitos($nombres);
+
+		if ($invalidos) {
+
+			$invalido = $invalidos[0][0];
+			$noAprobados = $invalidos[0][1];
+			$error = "No puede elegir el curso $invalido debido a que usted no ha aprobado: ";
+
+			$last = end($noAprobados);
+			foreach ($noAprobados as $noAprobado) {
+
+				if ($last == $noAprobado) {
+					$error .= $noAprobado;
+				} else {
+					$error .= $noAprobado . ", ";
+				}
+			}
+
+			return redirect()->back()->with('error', $error);
+		}
+
 		$cursos = CursosController::obtenerCursos();
 		$semana = CursosController::obtenerSemana();
 		$iteraciones = 5000;
@@ -807,6 +854,27 @@ class CursosController extends Controller
 	public function simulated_annealing(Request $request)
 	{
 		$nombres = $request->input('nombres');
+		$invalidos = CursosController::consultarPrerequisitos($nombres);
+
+		if ($invalidos) {
+
+			$invalido = $invalidos[0][0];
+			$noAprobados = $invalidos[0][1];
+			$error = "No puede elegir el curso $invalido debido a que usted no ha aprobado: ";
+
+			$last = end($noAprobados);
+			foreach ($noAprobados as $noAprobado) {
+
+				if ($last == $noAprobado) {
+					$error .= $noAprobado;
+				} else {
+					$error .= $noAprobado . ", ";
+				}
+			}
+
+			return redirect()->back()->with('error', $error);
+		}
+
 		$cursos = CursosController::obtenerCursos();
 		$semana = CursosController::obtenerSemana();
 		$temperatura = 500;
@@ -1055,13 +1123,34 @@ class CursosController extends Controller
 	public function ant_colony(Request $request)
 	{
 		$nombres = $request->input('nombres');
+		$invalidos = CursosController::consultarPrerequisitos($nombres);
+
+		if ($invalidos) {
+
+			$invalido = $invalidos[0][0];
+			$noAprobados = $invalidos[0][1];
+			$error = "No puede elegir el curso $invalido debido a que usted no ha aprobado: ";
+
+			$last = end($noAprobados);
+			foreach ($noAprobados as $noAprobado) {
+
+				if ($last == $noAprobado) {
+					$error .= $noAprobado;
+				} else {
+					$error .= $noAprobado . ", ";
+				}
+			}
+
+			return redirect()->back()->with('error', $error);
+		}
+
 		$cursos = CursosController::obtenerCursos();
 		$distancias = CursosController::obtenerDistancias($nombres, $cursos);
 		$locales = CursosController::obtenerHeuristicasLocales($distancias);
 		$feromonas = CursosController::obtenerMatrizFeromonas($distancias);
 		$semana = CursosController::obtenerSemana();
-		$iteraciones = 10000;
-		$repeticiones = 10000;
+		$iteraciones = 5000;
+		$repeticiones = 5000;
 		$cruzados = [];
 		$elegidos = [];
 		$start = microtime(true);
