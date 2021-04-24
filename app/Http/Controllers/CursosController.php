@@ -21,6 +21,8 @@ class CursosController extends Controller
 			$n = (int)round($n * 3);
 		}
 
+		$n = 3;
+
 		switch ($n) {
 			case 1:
 				$meta = 'hill_climbing';
@@ -611,460 +613,480 @@ class CursosController extends Controller
 		return $invalidos;
 	}
 
+	public function stats_standard_deviation(array $a, $sample = true)
+	{
+		$n = count($a);
+		if ($n === 0) {
+			trigger_error("The array has zero elements", E_USER_WARNING);
+			return false;
+		}
+		if ($sample && $n === 1) {
+			trigger_error("The array has only 1 element", E_USER_WARNING);
+			return false;
+		}
+		$mean = array_sum($a) / $n;
+		$carry = 0.0;
+		foreach ($a as $val) {
+			$d = ((float) $val) - $mean;
+			$carry += $d * $d;
+		};
+		if ($sample) {
+			--$n;
+		}
+		return sqrt($carry / $n);
+	}
+
 	public function hill_climbing(Request $request)
 	{
-		$nombres = $request->input('nombres');
-		$invalidos = CursosController::consultarPrerequisitos($nombres);
+		$ensayos = 50;
+		$soluciones = [];
+		$tiempos = [];
 
-		if ($invalidos) {
+		while ($ensayos > 0) {
+			$nombres = $request->input('nombres');
+			$invalidos = CursosController::consultarPrerequisitos($nombres);
 
-			$invalido = $invalidos[0][0];
-			$noAprobados = $invalidos[0][1];
-			$error = "No puede elegir el curso $invalido debido a que usted no ha aprobado: ";
+			if ($invalidos) {
 
-			$last = end($noAprobados);
-			foreach ($noAprobados as $noAprobado) {
+				$invalido = $invalidos[0][0];
+				$noAprobados = $invalidos[0][1];
+				$error = "No puede elegir el curso $invalido debido a que usted no ha aprobado: ";
 
-				if ($last == $noAprobado) {
-					$error .= $noAprobado;
-				} else {
-					$error .= $noAprobado . ", ";
-				}
-			}
+				$last = end($noAprobados);
+				foreach ($noAprobados as $noAprobado) {
 
-			return redirect()->back()->with('error', $error);
-		}
-
-		$cursos = CursosController::obtenerCursos();
-		$semana = CursosController::obtenerSemana();
-		$iteraciones = 5000;
-		$cruzados = [];
-		$elegidos = [];
-		$start = microtime(true);
-
-		foreach ($nombres as $nombre) {
-
-			$listaNrc = $cursos[$nombre]['nrc'];
-
-			foreach ($listaNrc as $nrc => $infoNrc) {
-
-				$listaDias = $infoNrc['dias'];
-				$seccion = $infoNrc['seccion'];
-
-				if (substr($seccion, -1) == "1" or substr($seccion, -1) == "2") {
-					continue;
-				} else {
-
-					$aceptado = false;
-					$ultimo_nrc = CursosController::endKey($listaNrc, 1);
-					$ultimo_dia = CursosController::endKey($listaDias, 2);
-
-					foreach ($listaDias as $dia => $infoDia) {
-
-						$horas = $infoDia['horas'];
-
-						$validarNrc = CursosController::validarNrc($semana, $dia, $horas, $nrc);
-						$semana = $validarNrc[1];
-						$valido = $validarNrc[0];
-
-						if ($valido) {
-							if ($dia == $ultimo_dia) {
-								$aceptado = true;
-								$elegidos[] = $nrc;
-							}
-						} else {
-							// Se quita el NRC de toda la semana
-							foreach ($semana as $day => $hours) {
-								foreach ($hours as $hour => $time) {
-									if ($time == $nrc) {
-										$semana[$day][$hour] = '';
-									}
-								}
-							}
-
-							break;
-						}
-					}
-
-					if ($aceptado) {
-						break;
-					}
-
-					if ($nrc == $ultimo_nrc) {
-						$cruzados[] = $nombre;
-					}
-				}
-			}
-		}
-
-		if ($cruzados) {
-			$error = "Los NRC de los siguientes cursos se cruzan: ";
-
-			$last = end($cruzados);
-			foreach ($cruzados as $cruzado) {
-
-				if ($last == $cruzado) {
-
-					$error .= $cruzado;
-				} else {
-
-					$error .= $cruzado . ", ";
-				}
-			}
-
-			return redirect()->back()->with('error', $error);
-		} else {
-			// $semanas = [];
-			$huequillos = [];
-			while ($iteraciones > 0) {
-				$perturbada = $semana;
-
-				while (true) {
-					if (count($elegidos) == 1) {
-						$nrc1 = end($elegidos);
-						break;
+					if ($last == $noAprobado) {
+						$error .= $noAprobado;
 					} else {
-						$nrc1 = array_rand(array_flip($elegidos));
-						$nrc2 = array_rand(array_flip($elegidos));
-						if ($nrc1 != $nrc2) {
-							break;
-						}
+						$error .= $noAprobado . ", ";
 					}
 				}
 
-				$nombre1 = CursosController::nombreNrc($nrc1);
-				if (isset($nrc2)) {
-					$nombre2 = CursosController::nombreNrc($nrc2);
-				}
+				return redirect()->back()->with('error', $error);
+			}
 
-				foreach ($perturbada as $dia => $horas) {
+			$cursos = CursosController::obtenerCursos();
+			$semana = CursosController::obtenerSemana();
+			$iteraciones = 5000;
+			$cruzados = [];
+			$elegidos = [];
+			$start = microtime(true);
 
-					foreach ($horas as $hora => $nrc) {
+			foreach ($nombres as $nombre) {
 
-						if ($nrc == $nrc1) {
-							$perturbada[$dia][$hora] = '';
-						} elseif (isset($nrc2)) {
-							if ($nrc == $nrc2) {
-								$perturbada[$dia][$hora] = '';
-							}
-						}
-					}
-				}
+				$listaNrc = $cursos[$nombre]['nrc'];
 
-				while (true) {
+				foreach ($listaNrc as $nrc => $infoNrc) {
 
-					$permutacion1 = CursosController::permutacion($nombre1, $perturbada, $cursos);
-					if ($permutacion1['continue']) {
+					$listaDias = $infoNrc['dias'];
+					$seccion = $infoNrc['seccion'];
+
+					if (substr($seccion, -1) == "1" or substr($seccion, -1) == "2") {
 						continue;
 					} else {
-						if ($permutacion1['aceptado']) {
-							if (!isset($nombre2)) {
-								$perturbada = $permutacion1['perturbada'];
+
+						$aceptado = false;
+						$ultimo_nrc = CursosController::endKey($listaNrc, 1);
+						$ultimo_dia = CursosController::endKey($listaDias, 2);
+
+						foreach ($listaDias as $dia => $infoDia) {
+
+							$horas = $infoDia['horas'];
+
+							$validarNrc = CursosController::validarNrc($semana, $dia, $horas, $nrc);
+							$semana = $validarNrc[1];
+							$valido = $validarNrc[0];
+
+							if ($valido) {
+								if ($dia == $ultimo_dia) {
+									$aceptado = true;
+									$elegidos[] = $nrc;
+								}
 							} else {
-								$perturbada1 = $permutacion1['perturbada'];
+								// Se quita el NRC de toda la semana
+								foreach ($semana as $day => $hours) {
+									foreach ($hours as $hour => $time) {
+										if ($time == $nrc) {
+											$semana[$day][$hour] = '';
+										}
+									}
+								}
+
+								break;
 							}
-							$aleatorio1 = $permutacion1['aleatorio'];
+						}
+
+						if ($aceptado) {
+							break;
+						}
+
+						if ($nrc == $ultimo_nrc) {
+							$cruzados[] = $nombre;
+						}
+					}
+				}
+			}
+
+			if ($cruzados) {
+				$error = "Los NRC de los siguientes cursos se cruzan: ";
+
+				$last = end($cruzados);
+				foreach ($cruzados as $cruzado) {
+
+					if ($last == $cruzado) {
+
+						$error .= $cruzado;
+					} else {
+
+						$error .= $cruzado . ", ";
+					}
+				}
+
+				return redirect()->back()->with('error', $error);
+			} else {
+				// $semanas = [];
+				$huequillos = [];
+				while ($iteraciones > 0) {
+					$perturbada = $semana;
+
+					while (true) {
+						if (count($elegidos) == 1) {
+							$nrc1 = end($elegidos);
+							break;
 						} else {
-							continue;
+							$nrc1 = array_rand(array_flip($elegidos));
+							$nrc2 = array_rand(array_flip($elegidos));
+							if ($nrc1 != $nrc2) {
+								break;
+							}
 						}
 					}
 
-					if (isset($nombre2)) {
+					$nombre1 = CursosController::nombreNrc($nrc1);
+					if (isset($nrc2)) {
+						$nombre2 = CursosController::nombreNrc($nrc2);
+					}
 
-						$permutacion2 = CursosController::permutacion($nombre2, $perturbada1, $cursos);
-						if ($permutacion2['continue']) {
+					foreach ($perturbada as $dia => $horas) {
+
+						foreach ($horas as $hora => $nrc) {
+
+							if ($nrc == $nrc1) {
+								$perturbada[$dia][$hora] = '';
+							} elseif (isset($nrc2)) {
+								if ($nrc == $nrc2) {
+									$perturbada[$dia][$hora] = '';
+								}
+							}
+						}
+					}
+
+					while (true) {
+
+						$permutacion1 = CursosController::permutacion($nombre1, $perturbada, $cursos);
+						if ($permutacion1['continue']) {
 							continue;
 						} else {
-							if ($permutacion2['aceptado']) {
-								$perturbada = $permutacion2['perturbada'];
-								$aleatorio2 = $permutacion2['aleatorio'];
+							if ($permutacion1['aceptado']) {
+								if (!isset($nombre2)) {
+									$perturbada = $permutacion1['perturbada'];
+								} else {
+									$perturbada1 = $permutacion1['perturbada'];
+								}
+								$aleatorio1 = $permutacion1['aleatorio'];
 							} else {
 								continue;
 							}
 						}
-					}
 
-					break;
-				}
-				// $semanas[] = [$semana, $nrc1, $aleatorio1];
+						if (isset($nombre2)) {
 
-
-				$huecos_zx = CursosController::contarHuecos($semana);
-				$huecos_zxp = CursosController::contarHuecos($perturbada);
-
-				$zx = array_sum($huecos_zx);
-				$zxp = array_sum($huecos_zxp);
-
-				if ($zxp < $zx) {
-					foreach ($elegidos as $i => $elegido) {
-						if ($elegido == $nrc1) {
-							unset($elegidos[$i]);
-						} elseif (isset($nrc2)) {
-							if ($elegido == $nrc2) {
-								unset($elegidos[$i]);
+							$permutacion2 = CursosController::permutacion($nombre2, $perturbada1, $cursos);
+							if ($permutacion2['continue']) {
+								continue;
+							} else {
+								if ($permutacion2['aceptado']) {
+									$perturbada = $permutacion2['perturbada'];
+									$aleatorio2 = $permutacion2['aleatorio'];
+								} else {
+									continue;
+								}
 							}
 						}
+
+						break;
 					}
-					$elegidos = array_values($elegidos);
+					// $semanas[] = [$semana, $nrc1, $aleatorio1];
 
-					$elegidos[] = $aleatorio1;
-					if (isset($aleatorio2)) {
-						$elegidos[] = $aleatorio2;
+
+					$huecos_zx = CursosController::contarHuecos($semana);
+					$huecos_zxp = CursosController::contarHuecos($perturbada);
+
+					$zx = array_sum($huecos_zx);
+					$zxp = array_sum($huecos_zxp);
+
+					if ($zxp < $zx) {
+						foreach ($elegidos as $i => $elegido) {
+							if ($elegido == $nrc1) {
+								unset($elegidos[$i]);
+							} elseif (isset($nrc2)) {
+								if ($elegido == $nrc2) {
+									unset($elegidos[$i]);
+								}
+							}
+						}
+						$elegidos = array_values($elegidos);
+
+						$elegidos[] = $aleatorio1;
+						if (isset($aleatorio2)) {
+							$elegidos[] = $aleatorio2;
+						}
+
+						$huequillos[] = $zxp;
+
+						$semana = $perturbada;
 					}
 
-					$huequillos[] = $zxp;
-
-					$semana = $perturbada;
+					$iteraciones -= 1;
+				}
+				$end = microtime(true);
+				$time = $end - $start;
+				// dd($time, $huequillos);
+				$definitivos = [];
+				foreach ($elegidos as $elegido) {
+					$nombre = CursosController::nombreNrc($elegido);
+					$definitivos[$elegido] = $nombre;
 				}
 
-				$iteraciones -= 1;
-			}
-			$end = microtime(true);
-			$time = $end - $start;
-			// dd($time, $huequillos);
-			$definitivos = [];
-			foreach ($elegidos as $elegido) {
-				$nombre = CursosController::nombreNrc($elegido);
-				$definitivos[$elegido] = $nombre;
-			}
-
-			$filas = [];
-			for ($i = 7; $i <= 20; $i++) {
-				foreach ($semana as $dia => $horas) {
-					$filas[$i][] = $semana[$dia][$i];
+				$filas = [];
+				for ($i = 7; $i <= 20; $i++) {
+					foreach ($semana as $dia => $horas) {
+						$filas[$i][] = $semana[$dia][$i];
+					}
 				}
-			}
 
-			$sem = [];
-			// foreach ($semanas as $semana) {
-			// 	$lista = [];
-			// 	foreach ($semana[0] as $dia => $horas) {
-			// 		foreach ($horas as $hora => $nrc) {
-			// 			if (!empty($nrc) and !in_array($nrc, $lista)) {
-			// 				$lista[] = $nrc;
-			// 			}
-			// 		}
-			// 	}
-			// 	$sem[] = [$lista, $semana[1], $semana[2]];
-			// }
-			return view('resultado', ['cursos' => $cursos, 'filas' => $filas, 'definitivos' => $definitivos, 'sem' => $sem]);
+				$sem = [];
+				// foreach ($semanas as $semana) {
+				// 	$lista = [];
+				// 	foreach ($semana[0] as $dia => $horas) {
+				// 		foreach ($horas as $hora => $nrc) {
+				// 			if (!empty($nrc) and !in_array($nrc, $lista)) {
+				// 				$lista[] = $nrc;
+				// 			}
+				// 		}
+				// 	}
+				// 	$sem[] = [$lista, $semana[1], $semana[2]];
+				// }
+				$huecos_zx = CursosController::contarHuecos($semana);
+				$zx = array_sum($huecos_zx);
+				$soluciones[] = $zx;
+				$tiempos[] = $time;
+			}
+			$ensayos -= 1;
 		}
+
+		$promedio_soluciones = array_sum($soluciones) / count($soluciones);
+		$promerio_tiempos = array_sum($tiempos) / count($tiempos);
+
+		$de_soluciones = CursosController::stats_standard_deviation($soluciones);
+		$de_tiempos = CursosController::stats_standard_deviation($tiempos);
+
+		$robustez = count(array_unique($soluciones));
+		dd($soluciones, $tiempos, $promedio_soluciones, $promerio_tiempos, $de_soluciones, $de_tiempos, $robustez);
+		return view('resultado', ['cursos' => $cursos, 'filas' => $filas, 'definitivos' => $definitivos, 'sem' => $sem]);
 	}
 
 	public function simulated_annealing(Request $request)
 	{
-		$nombres = $request->input('nombres');
-		$invalidos = CursosController::consultarPrerequisitos($nombres);
+		$ensayos = 50;
+		$soluciones = [];
+		$tiempos = [];
 
-		if ($invalidos) {
+		while ($ensayos > 0) {
+			$nombres = $request->input('nombres');
+			$invalidos = CursosController::consultarPrerequisitos($nombres);
 
-			$invalido = $invalidos[0][0];
-			$noAprobados = $invalidos[0][1];
-			$error = "No puede elegir el curso $invalido debido a que usted no ha aprobado: ";
+			if ($invalidos) {
 
-			$last = end($noAprobados);
-			foreach ($noAprobados as $noAprobado) {
+				$invalido = $invalidos[0][0];
+				$noAprobados = $invalidos[0][1];
+				$error = "No puede elegir el curso $invalido debido a que usted no ha aprobado: ";
 
-				if ($last == $noAprobado) {
-					$error .= $noAprobado;
-				} else {
-					$error .= $noAprobado . ", ";
-				}
-			}
+				$last = end($noAprobados);
+				foreach ($noAprobados as $noAprobado) {
 
-			return redirect()->back()->with('error', $error);
-		}
-
-		$cursos = CursosController::obtenerCursos();
-		$semana = CursosController::obtenerSemana();
-		$temperatura = 500;
-		$alfa = 0.99;
-		$cruzados = [];
-		$elegidos = [];
-		$start = microtime(true);
-
-		foreach ($nombres as $nombre) {
-
-			$listaNrc = $cursos[$nombre]['nrc'];
-
-			foreach ($listaNrc as $nrc => $infoNrc) {
-
-				$listaDias = $infoNrc['dias'];
-				$seccion = $infoNrc['seccion'];
-
-				if (substr($seccion, -1) == "1" or substr($seccion, -1) == "2") {
-					continue;
-				} else {
-
-					$aceptado = false;
-					$ultimo_nrc = CursosController::endKey($listaNrc, 1);
-					$ultimo_dia = CursosController::endKey($listaDias, 2);
-
-					foreach ($listaDias as $dia => $infoDia) {
-
-						$horas = $infoDia['horas'];
-
-						$validarNrc = CursosController::validarNrc($semana, $dia, $horas, $nrc);
-						$semana = $validarNrc[1];
-						$valido = $validarNrc[0];
-
-						if ($valido) {
-							if ($dia == $ultimo_dia) {
-								$aceptado = true;
-								$elegidos[] = $nrc;
-							}
-						} else {
-							// Se quita el NRC de toda la semana
-							foreach ($semana as $day => $hours) {
-								foreach ($hours as $hour => $time) {
-									if ($time == $nrc) {
-										$semana[$day][$hour] = '';
-									}
-								}
-							}
-
-							break;
-						}
-					}
-
-					if ($aceptado) {
-						break;
-					}
-
-					if ($nrc == $ultimo_nrc) {
-						$cruzados[] = $nombre;
-					}
-				}
-			}
-		}
-
-		if ($cruzados) {
-			$error = "Los NRC de los siguientes cursos se cruzan: ";
-
-			$last = end($cruzados);
-			foreach ($cruzados as $cruzado) {
-
-				if ($last == $cruzado) {
-
-					$error .= $cruzado;
-				} else {
-
-					$error .= $cruzado . ", ";
-				}
-			}
-
-			return redirect()->back()->with('error', $error);
-		} else {
-			// $semanas = [];
-			// $huequillos = [];
-			while ($temperatura > 0.1) {
-				$perturbada = $semana;
-
-				while (true) {
-					if (count($elegidos) == 1) {
-						$nrc1 = end($elegidos);
-						break;
+					if ($last == $noAprobado) {
+						$error .= $noAprobado;
 					} else {
-						$nrc1 = array_rand(array_flip($elegidos));
-						$nrc2 = array_rand(array_flip($elegidos));
-						if ($nrc1 != $nrc2) {
-							break;
-						}
+						$error .= $noAprobado . ", ";
 					}
 				}
 
-				$nombre1 = CursosController::nombreNrc($nrc1);
-				if (isset($nrc2)) {
-					$nombre2 = CursosController::nombreNrc($nrc2);
-				}
+				return redirect()->back()->with('error', $error);
+			}
 
-				foreach ($perturbada as $dia => $horas) {
+			$cursos = CursosController::obtenerCursos();
+			$semana = CursosController::obtenerSemana();
+			$temperatura = 5000;
+			$alfa = 0.99;
+			$cruzados = [];
+			$elegidos = [];
+			$start = microtime(true);
 
-					foreach ($horas as $hora => $nrc) {
+			foreach ($nombres as $nombre) {
 
-						if ($nrc == $nrc1) {
-							$perturbada[$dia][$hora] = '';
-						} elseif (isset($nrc2)) {
-							if ($nrc == $nrc2) {
-								$perturbada[$dia][$hora] = '';
-							}
-						}
-					}
-				}
+				$listaNrc = $cursos[$nombre]['nrc'];
 
-				while (true) {
+				foreach ($listaNrc as $nrc => $infoNrc) {
 
-					$permutacion1 = CursosController::permutacion($nombre1, $perturbada, $cursos);
-					if ($permutacion1['continue']) {
+					$listaDias = $infoNrc['dias'];
+					$seccion = $infoNrc['seccion'];
+
+					if (substr($seccion, -1) == "1" or substr($seccion, -1) == "2") {
 						continue;
 					} else {
-						if ($permutacion1['aceptado']) {
-							if (!isset($nombre2)) {
-								$perturbada = $permutacion1['perturbada'];
+
+						$aceptado = false;
+						$ultimo_nrc = CursosController::endKey($listaNrc, 1);
+						$ultimo_dia = CursosController::endKey($listaDias, 2);
+
+						foreach ($listaDias as $dia => $infoDia) {
+
+							$horas = $infoDia['horas'];
+
+							$validarNrc = CursosController::validarNrc($semana, $dia, $horas, $nrc);
+							$semana = $validarNrc[1];
+							$valido = $validarNrc[0];
+
+							if ($valido) {
+								if ($dia == $ultimo_dia) {
+									$aceptado = true;
+									$elegidos[] = $nrc;
+								}
 							} else {
-								$perturbada1 = $permutacion1['perturbada'];
+								// Se quita el NRC de toda la semana
+								foreach ($semana as $day => $hours) {
+									foreach ($hours as $hour => $time) {
+										if ($time == $nrc) {
+											$semana[$day][$hour] = '';
+										}
+									}
+								}
+
+								break;
 							}
-							$aleatorio1 = $permutacion1['aleatorio'];
+						}
+
+						if ($aceptado) {
+							break;
+						}
+
+						if ($nrc == $ultimo_nrc) {
+							$cruzados[] = $nombre;
+						}
+					}
+				}
+			}
+
+			if ($cruzados) {
+				$error = "Los NRC de los siguientes cursos se cruzan: ";
+
+				$last = end($cruzados);
+				foreach ($cruzados as $cruzado) {
+
+					if ($last == $cruzado) {
+
+						$error .= $cruzado;
+					} else {
+
+						$error .= $cruzado . ", ";
+					}
+				}
+
+				return redirect()->back()->with('error', $error);
+			} else {
+				// $semanas = [];
+				// $huequillos = [];
+				while ($temperatura > 0.1) {
+					$perturbada = $semana;
+
+					while (true) {
+						if (count($elegidos) == 1) {
+							$nrc1 = end($elegidos);
+							break;
 						} else {
-							continue;
+							$nrc1 = array_rand(array_flip($elegidos));
+							$nrc2 = array_rand(array_flip($elegidos));
+							if ($nrc1 != $nrc2) {
+								break;
+							}
 						}
 					}
 
-					if (isset($nombre2)) {
+					$nombre1 = CursosController::nombreNrc($nrc1);
+					if (isset($nrc2)) {
+						$nombre2 = CursosController::nombreNrc($nrc2);
+					}
 
-						$permutacion2 = CursosController::permutacion($nombre2, $perturbada1, $cursos);
-						if ($permutacion2['continue']) {
+					foreach ($perturbada as $dia => $horas) {
+
+						foreach ($horas as $hora => $nrc) {
+
+							if ($nrc == $nrc1) {
+								$perturbada[$dia][$hora] = '';
+							} elseif (isset($nrc2)) {
+								if ($nrc == $nrc2) {
+									$perturbada[$dia][$hora] = '';
+								}
+							}
+						}
+					}
+
+					while (true) {
+
+						$permutacion1 = CursosController::permutacion($nombre1, $perturbada, $cursos);
+						if ($permutacion1['continue']) {
 							continue;
 						} else {
-							if ($permutacion2['aceptado']) {
-								$perturbada = $permutacion2['perturbada'];
-								$aleatorio2 = $permutacion2['aleatorio'];
+							if ($permutacion1['aceptado']) {
+								if (!isset($nombre2)) {
+									$perturbada = $permutacion1['perturbada'];
+								} else {
+									$perturbada1 = $permutacion1['perturbada'];
+								}
+								$aleatorio1 = $permutacion1['aleatorio'];
 							} else {
 								continue;
 							}
 						}
-					}
 
-					break;
-				}
-				// $semanas[] = [$semana, $nrc1, $aleatorio1];
+						if (isset($nombre2)) {
 
-
-				$huecos_zx = CursosController::contarHuecos($semana);
-				$huecos_zxp = CursosController::contarHuecos($perturbada);
-
-				$zx = array_sum($huecos_zx);
-				$zxp = array_sum($huecos_zxp);
-
-				if ($zxp < $zx) {
-					foreach ($elegidos as $i => $elegido) {
-						if ($elegido == $nrc1) {
-							unset($elegidos[$i]);
-						} elseif (isset($nrc2)) {
-							if ($elegido == $nrc2) {
-								unset($elegidos[$i]);
+							$permutacion2 = CursosController::permutacion($nombre2, $perturbada1, $cursos);
+							if ($permutacion2['continue']) {
+								continue;
+							} else {
+								if ($permutacion2['aceptado']) {
+									$perturbada = $permutacion2['perturbada'];
+									$aleatorio2 = $permutacion2['aleatorio'];
+								} else {
+									continue;
+								}
 							}
 						}
+
+						break;
 					}
-					$elegidos = array_values($elegidos);
+					// $semanas[] = [$semana, $nrc1, $aleatorio1];
 
-					$elegidos[] = $aleatorio1;
-					if (isset($aleatorio2)) {
-						$elegidos[] = $aleatorio2;
-					}
 
-					$huequillos[] = $zxp;
+					$huecos_zx = CursosController::contarHuecos($semana);
+					$huecos_zxp = CursosController::contarHuecos($perturbada);
 
-					$semana = $perturbada;
-					$temperatura *= $alfa;
-				} else {
-					$n = (float)rand() / (float)getrandmax();
-					$e = M_E;
-					$dz = $zxp - $zx;
-					$division = - ($dz / $temperatura);
-					$pdx = pow($e, $division);
+					$zx = array_sum($huecos_zx);
+					$zxp = array_sum($huecos_zxp);
 
-					if ($n < $pdx) {
+					if ($zxp < $zx) {
 						foreach ($elegidos as $i => $elegido) {
 							if ($elegido == $nrc1) {
 								unset($elegidos[$i]);
@@ -1085,440 +1107,503 @@ class CursosController extends Controller
 
 						$semana = $perturbada;
 						$temperatura *= $alfa;
+					} else {
+						$n = (float)rand() / (float)getrandmax();
+						$e = M_E;
+						$dz = $zxp - $zx;
+						$division = - ($dz / $temperatura);
+						$pdx = pow($e, $division);
+
+						if ($n < $pdx) {
+							foreach ($elegidos as $i => $elegido) {
+								if ($elegido == $nrc1) {
+									unset($elegidos[$i]);
+								} elseif (isset($nrc2)) {
+									if ($elegido == $nrc2) {
+										unset($elegidos[$i]);
+									}
+								}
+							}
+							$elegidos = array_values($elegidos);
+
+							$elegidos[] = $aleatorio1;
+							if (isset($aleatorio2)) {
+								$elegidos[] = $aleatorio2;
+							}
+
+							$huequillos[] = $zxp;
+
+							$semana = $perturbada;
+							$temperatura *= $alfa;
+						}
 					}
 				}
-			}
-			$end = microtime(true);
-			$time = $end - $start;
-			// dd($time, $huequillos);
-			$definitivos = [];
-			foreach ($elegidos as $elegido) {
-				$nombre = CursosController::nombreNrc($elegido);
-				$definitivos[$elegido] = $nombre;
-			}
-
-			$filas = [];
-			for ($i = 7; $i <= 20; $i++) {
-				foreach ($semana as $dia => $horas) {
-					$filas[$i][] = $semana[$dia][$i];
+				$end = microtime(true);
+				$time = $end - $start;
+				// dd($time, $huequillos);
+				$definitivos = [];
+				foreach ($elegidos as $elegido) {
+					$nombre = CursosController::nombreNrc($elegido);
+					$definitivos[$elegido] = $nombre;
 				}
-			}
 
-			$sem = [];
-			// foreach ($semanas as $semana) {
-			// 	$lista = [];
-			// 	foreach ($semana[0] as $dia => $horas) {
-			// 		foreach ($horas as $hora => $nrc) {
-			// 			if (!empty($nrc) and !in_array($nrc, $lista)) {
-			// 				$lista[] = $nrc;
-			// 			}
-			// 		}
-			// 	}
-			// 	$sem[] = [$lista, $semana[1], $semana[2]];
-			// }
-			return view('resultado', ['cursos' => $cursos, 'filas' => $filas, 'definitivos' => $definitivos, 'sem' => $sem]);
+				$filas = [];
+				for ($i = 7; $i <= 20; $i++) {
+					foreach ($semana as $dia => $horas) {
+						$filas[$i][] = $semana[$dia][$i];
+					}
+				}
+
+				$sem = [];
+				// foreach ($semanas as $semana) {
+				// 	$lista = [];
+				// 	foreach ($semana[0] as $dia => $horas) {
+				// 		foreach ($horas as $hora => $nrc) {
+				// 			if (!empty($nrc) and !in_array($nrc, $lista)) {
+				// 				$lista[] = $nrc;
+				// 			}
+				// 		}
+				// 	}
+				// 	$sem[] = [$lista, $semana[1], $semana[2]];
+				// }
+				$huecos_zx = CursosController::contarHuecos($semana);
+				$zx = array_sum($huecos_zx);
+				$soluciones[] = $zx;
+				$tiempos[] = $time;
+			}
+			$ensayos -= 1;
 		}
+
+		$promedio_soluciones = array_sum($soluciones) / count($soluciones);
+		$promerio_tiempos = array_sum($tiempos) / count($tiempos);
+
+		$de_soluciones = CursosController::stats_standard_deviation($soluciones);
+		$de_tiempos = CursosController::stats_standard_deviation($tiempos);
+
+		$robustez = count(array_unique($soluciones));
+		dd($soluciones, $tiempos, $promedio_soluciones, $promerio_tiempos, $de_soluciones, $de_tiempos, $robustez);
+		return view('resultado', ['cursos' => $cursos, 'filas' => $filas, 'definitivos' => $definitivos, 'sem' => $sem]);
 	}
 
 	public function ant_colony(Request $request)
 	{
-		$nombres = $request->input('nombres');
-		$invalidos = CursosController::consultarPrerequisitos($nombres);
+		$ensayos = 50;
+		$soluciones = [];
+		$tiempos = [];
 
-		if ($invalidos) {
+		while ($ensayos > 0) {
+			$nombres = $request->input('nombres');
+			$invalidos = CursosController::consultarPrerequisitos($nombres);
 
-			$invalido = $invalidos[0][0];
-			$noAprobados = $invalidos[0][1];
-			$error = "No puede elegir el curso $invalido debido a que usted no ha aprobado: ";
+			if ($invalidos) {
 
-			$last = end($noAprobados);
-			foreach ($noAprobados as $noAprobado) {
+				$invalido = $invalidos[0][0];
+				$noAprobados = $invalidos[0][1];
+				$error = "No puede elegir el curso $invalido debido a que usted no ha aprobado: ";
 
-				if ($last == $noAprobado) {
-					$error .= $noAprobado;
-				} else {
-					$error .= $noAprobado . ", ";
-				}
-			}
+				$last = end($noAprobados);
+				foreach ($noAprobados as $noAprobado) {
 
-			return redirect()->back()->with('error', $error);
-		}
-
-		$cursos = CursosController::obtenerCursos();
-		$distancias = CursosController::obtenerDistancias($nombres, $cursos);
-		$locales = CursosController::obtenerHeuristicasLocales($distancias);
-		$feromonas = CursosController::obtenerMatrizFeromonas($distancias);
-		$semana = CursosController::obtenerSemana();
-		$iteraciones = 5000;
-		$repeticiones = 5000;
-		$cruzados = [];
-		$elegidos = [];
-		$start = microtime(true);
-		$resultados = [];
-		$numero_elegidos = count($nombres);
-		$huecos = 0;
-		$elegidos_def = [];
-		$semana_def = [];
-
-		foreach ($nombres as $nombre) {
-
-			$listaNrc = $cursos[$nombre]['nrc'];
-
-			foreach ($listaNrc as $nrc => $infoNrc) {
-
-				$listaDias = $infoNrc['dias'];
-				$seccion = $infoNrc['seccion'];
-
-				if (substr($seccion, -1) == "1" or substr($seccion, -1) == "2") {
-					continue;
-				} else {
-
-					$aceptado = false;
-					$ultimo_nrc = CursosController::endKey($listaNrc, 1);
-					$ultimo_dia = CursosController::endKey($listaDias, 2);
-
-					foreach ($listaDias as $dia => $infoDia) {
-
-						$horas = $infoDia['horas'];
-
-						$validarNrc = CursosController::validarNrc($semana, $dia, $horas, $nrc);
-						$semana = $validarNrc[1];
-						$valido = $validarNrc[0];
-
-						if ($valido) {
-							if ($dia == $ultimo_dia) {
-								$aceptado = true;
-								$elegidos[] = $nrc;
-							}
-						} else {
-							// Se quita el NRC de toda la semana
-							foreach ($semana as $day => $hours) {
-								foreach ($hours as $hour => $time) {
-									if ($time == $nrc) {
-										$semana[$day][$hour] = '';
-									}
-								}
-							}
-
-							break;
-						}
-					}
-
-					if ($aceptado) {
-						break;
-					}
-
-					if ($nrc == $ultimo_nrc) {
-						$cruzados[] = $nombre;
-					}
-				}
-			}
-		}
-
-		if ($cruzados) {
-			$error = "Los NRC de los siguientes cursos se cruzan: ";
-
-			$last = end($cruzados);
-			foreach ($cruzados as $cruzado) {
-
-				if ($last == $cruzado) {
-
-					$error .= $cruzado;
-				} else {
-
-					$error .= $cruzado . ", ";
-				}
-			}
-
-			return redirect()->back()->with('error', $error);
-		} else {
-			// $semanas = [];
-			$huequillos = [];
-			$semana_inicial = $semana;
-			$feromonas = CursosController::aumentarFeromonas($elegidos, $distancias, $feromonas);
-
-			while ($iteraciones > 0) {
-				$perturbada = $semana;
-
-				while (true) {
-					if (count($elegidos) == 1) {
-						$nrc1 = end($elegidos);
-						break;
+					if ($last == $noAprobado) {
+						$error .= $noAprobado;
 					} else {
-						$nrc1 = array_rand(array_flip($elegidos));
-						$nrc2 = array_rand(array_flip($elegidos));
-						if ($nrc1 != $nrc2) {
-							break;
-						}
+						$error .= $noAprobado . ", ";
 					}
 				}
 
-				$nombre1 = CursosController::nombreNrc($nrc1);
-				if (isset($nrc2)) {
-					$nombre2 = CursosController::nombreNrc($nrc2);
-				}
+				return redirect()->back()->with('error', $error);
+			}
 
-				foreach ($perturbada as $dia => $horas) {
+			$cursos = CursosController::obtenerCursos();
+			$distancias = CursosController::obtenerDistancias($nombres, $cursos);
+			$locales = CursosController::obtenerHeuristicasLocales($distancias);
+			$feromonas = CursosController::obtenerMatrizFeromonas($distancias);
+			$semana = CursosController::obtenerSemana();
+			$iteraciones = 50;
+			$repeticiones = 3000;
+			$cruzados = [];
+			$elegidos = [];
+			$start = microtime(true);
+			$resultados = [];
+			$numero_elegidos = count($nombres);
+			$huecos = 0;
+			$elegidos_def = [];
+			$semana_def = [];
 
-					foreach ($horas as $hora => $nrc) {
+			foreach ($nombres as $nombre) {
 
-						if ($nrc == $nrc1) {
-							$perturbada[$dia][$hora] = '';
-						} elseif (isset($nrc2)) {
-							if ($nrc == $nrc2) {
-								$perturbada[$dia][$hora] = '';
-							}
-						}
-					}
-				}
+				$listaNrc = $cursos[$nombre]['nrc'];
 
-				while (true) {
+				foreach ($listaNrc as $nrc => $infoNrc) {
 
-					$permutacion1 = CursosController::permutacion($nombre1, $perturbada, $cursos);
-					if ($permutacion1['continue']) {
+					$listaDias = $infoNrc['dias'];
+					$seccion = $infoNrc['seccion'];
+
+					if (substr($seccion, -1) == "1" or substr($seccion, -1) == "2") {
 						continue;
 					} else {
-						if ($permutacion1['aceptado']) {
-							if (!isset($nombre2)) {
-								$perturbada = $permutacion1['perturbada'];
+
+						$aceptado = false;
+						$ultimo_nrc = CursosController::endKey($listaNrc, 1);
+						$ultimo_dia = CursosController::endKey($listaDias, 2);
+
+						foreach ($listaDias as $dia => $infoDia) {
+
+							$horas = $infoDia['horas'];
+
+							$validarNrc = CursosController::validarNrc($semana, $dia, $horas, $nrc);
+							$semana = $validarNrc[1];
+							$valido = $validarNrc[0];
+
+							if ($valido) {
+								if ($dia == $ultimo_dia) {
+									$aceptado = true;
+									$elegidos[] = $nrc;
+								}
 							} else {
-								$perturbada1 = $permutacion1['perturbada'];
+								// Se quita el NRC de toda la semana
+								foreach ($semana as $day => $hours) {
+									foreach ($hours as $hour => $time) {
+										if ($time == $nrc) {
+											$semana[$day][$hour] = '';
+										}
+									}
+								}
+
+								break;
 							}
-							$aleatorio1 = $permutacion1['aleatorio'];
+						}
+
+						if ($aceptado) {
+							break;
+						}
+
+						if ($nrc == $ultimo_nrc) {
+							$cruzados[] = $nombre;
+						}
+					}
+				}
+			}
+
+			if ($cruzados) {
+				$error = "Los NRC de los siguientes cursos se cruzan: ";
+
+				$last = end($cruzados);
+				foreach ($cruzados as $cruzado) {
+
+					if ($last == $cruzado) {
+
+						$error .= $cruzado;
+					} else {
+
+						$error .= $cruzado . ", ";
+					}
+				}
+
+				return redirect()->back()->with('error', $error);
+			} else {
+				// $semanas = [];
+				$huequillos = [];
+				$semana_inicial = $semana;
+				$feromonas = CursosController::aumentarFeromonas($elegidos, $distancias, $feromonas);
+
+				while ($iteraciones > 0) {
+					$perturbada = $semana;
+
+					while (true) {
+						if (count($elegidos) == 1) {
+							$nrc1 = end($elegidos);
+							break;
 						} else {
-							continue;
+							$nrc1 = array_rand(array_flip($elegidos));
+							$nrc2 = array_rand(array_flip($elegidos));
+							if ($nrc1 != $nrc2) {
+								break;
+							}
 						}
 					}
 
-					if (isset($nombre2)) {
+					$nombre1 = CursosController::nombreNrc($nrc1);
+					if (isset($nrc2)) {
+						$nombre2 = CursosController::nombreNrc($nrc2);
+					}
 
-						$permutacion2 = CursosController::permutacion($nombre2, $perturbada1, $cursos);
-						if ($permutacion2['continue']) {
+					foreach ($perturbada as $dia => $horas) {
+
+						foreach ($horas as $hora => $nrc) {
+
+							if ($nrc == $nrc1) {
+								$perturbada[$dia][$hora] = '';
+							} elseif (isset($nrc2)) {
+								if ($nrc == $nrc2) {
+									$perturbada[$dia][$hora] = '';
+								}
+							}
+						}
+					}
+
+					while (true) {
+
+						$permutacion1 = CursosController::permutacion($nombre1, $perturbada, $cursos);
+						if ($permutacion1['continue']) {
 							continue;
 						} else {
-							if ($permutacion2['aceptado']) {
-								$perturbada = $permutacion2['perturbada'];
-								$aleatorio2 = $permutacion2['aleatorio'];
+							if ($permutacion1['aceptado']) {
+								if (!isset($nombre2)) {
+									$perturbada = $permutacion1['perturbada'];
+								} else {
+									$perturbada1 = $permutacion1['perturbada'];
+								}
+								$aleatorio1 = $permutacion1['aleatorio'];
 							} else {
 								continue;
 							}
 						}
-					}
 
-					break;
-				}
-				// $semanas[] = [$semana, $nrc1, $aleatorio1];
+						if (isset($nombre2)) {
 
-				foreach ($elegidos as $i => $elegido) {
-					if ($elegido == $nrc1) {
-						unset($elegidos[$i]);
-					} elseif (isset($nrc2)) {
-						if ($elegido == $nrc2) {
-							unset($elegidos[$i]);
-						}
-					}
-				}
-				$elegidos = array_values($elegidos);
-
-				$elegidos[] = $aleatorio1;
-				if (isset($aleatorio2)) {
-					$elegidos[] = $aleatorio2;
-				}
-
-				$feromonas = CursosController::aumentarFeromonas($elegidos, $distancias, $feromonas);
-				$semana = $perturbada;
-
-				$iteraciones -= 1;
-			}
-
-			foreach ($nombres as $nombre) {
-				foreach ($cursos[$nombre]['nrc'] as $nrc => $info_nrc) {
-					$puntos[] = ['nrc' => $nrc, 'nombre' => $nombre];
-				}
-			}
-
-			while ($repeticiones > 0) {
-
-				$elegidos = [];
-				$nombresX = [];
-				$descartados = [];
-				$semana = CursosController::obtenerSemana();
-				$nombreRamdom = array_rand(array_flip($nombres));
-				$nrcRamdom = array_rand(array_flip(array_keys($cursos[$nombreRamdom]['nrc'])));
-
-				$infoNrc = $cursos[$nombreRamdom]['nrc'][$nrcRamdom];
-				$listaDias = $infoNrc['dias'];
-				$seccion = $infoNrc['seccion'];
-
-				if (substr($seccion, -1) == "1" or substr($seccion, -1) == "2") {
-					continue;
-				} else {
-
-					$ultimo_dia = CursosController::endKey($listaDias, 2);
-					foreach ($listaDias as $dia => $infoDia) {
-
-						$horas = $infoDia['horas'];
-						$validarNrc = CursosController::validarNrc($semana, $dia, $horas, $nrcRamdom);
-						$semana = $validarNrc[1];
-
-						if ($dia == $ultimo_dia) {
-							$elegidos[] = $nrcRamdom;
-						}
-					}
-				}
-
-				$nombresX[] = $nombreRamdom;
-				$descartados[] = $nrcRamdom;
-
-				for ($i = 0; $i < count($nombres); $i++) {
-
-					$numeradores = [];
-					$probabilidades = [];
-					$acomuladas = [];
-
-					foreach ($puntos as $punto) {
-						if (in_array($punto['nombre'], $nombresX)) {
-							if (!in_array($punto['nrc'], $descartados)) {
-								$descartados[] = $punto['nrc'];
+							$permutacion2 = CursosController::permutacion($nombre2, $perturbada1, $cursos);
+							if ($permutacion2['continue']) {
+								continue;
+							} else {
+								if ($permutacion2['aceptado']) {
+									$perturbada = $permutacion2['perturbada'];
+									$aleatorio2 = $permutacion2['aleatorio'];
+								} else {
+									continue;
+								}
 							}
-						} else {
+						}
 
-							$estadoCruce = CursosController::verificarCruce($cursos, $semana, $punto['nrc'], $punto['nombre']);
+						break;
+					}
+					// $semanas[] = [$semana, $nrc1, $aleatorio1];
 
-							if ($estadoCruce) {
+					foreach ($elegidos as $i => $elegido) {
+						if ($elegido == $nrc1) {
+							unset($elegidos[$i]);
+						} elseif (isset($nrc2)) {
+							if ($elegido == $nrc2) {
+								unset($elegidos[$i]);
+							}
+						}
+					}
+					$elegidos = array_values($elegidos);
+
+					$elegidos[] = $aleatorio1;
+					if (isset($aleatorio2)) {
+						$elegidos[] = $aleatorio2;
+					}
+
+					$feromonas = CursosController::aumentarFeromonas($elegidos, $distancias, $feromonas);
+					$semana = $perturbada;
+
+					$iteraciones -= 1;
+				}
+
+				foreach ($nombres as $nombre) {
+					foreach ($cursos[$nombre]['nrc'] as $nrc => $info_nrc) {
+						$puntos[] = ['nrc' => $nrc, 'nombre' => $nombre];
+					}
+				}
+
+				while ($repeticiones > 0) {
+
+					$elegidos = [];
+					$nombresX = [];
+					$descartados = [];
+					$semana = CursosController::obtenerSemana();
+					$nombreRamdom = array_rand(array_flip($nombres));
+					$nrcRamdom = array_rand(array_flip(array_keys($cursos[$nombreRamdom]['nrc'])));
+
+					$infoNrc = $cursos[$nombreRamdom]['nrc'][$nrcRamdom];
+					$listaDias = $infoNrc['dias'];
+					$seccion = $infoNrc['seccion'];
+
+					if (substr($seccion, -1) == "1" or substr($seccion, -1) == "2") {
+						continue;
+					} else {
+
+						$ultimo_dia = CursosController::endKey($listaDias, 2);
+						foreach ($listaDias as $dia => $infoDia) {
+
+							$horas = $infoDia['horas'];
+							$validarNrc = CursosController::validarNrc($semana, $dia, $horas, $nrcRamdom);
+							$semana = $validarNrc[1];
+
+							if ($dia == $ultimo_dia) {
+								$elegidos[] = $nrcRamdom;
+							}
+						}
+					}
+
+					$nombresX[] = $nombreRamdom;
+					$descartados[] = $nrcRamdom;
+
+					for ($i = 0; $i < count($nombres); $i++) {
+
+						$numeradores = [];
+						$probabilidades = [];
+						$acomuladas = [];
+
+						foreach ($puntos as $punto) {
+							if (in_array($punto['nombre'], $nombresX)) {
 								if (!in_array($punto['nrc'], $descartados)) {
 									$descartados[] = $punto['nrc'];
 								}
 							} else {
-								$ultimoElegido = end($elegidos);
-								$valorFeromona = $feromonas[$ultimoElegido][$punto['nrc']];
-								$valorLocal = $locales[$ultimoElegido][$punto['nrc']];
-								$numerador = $valorFeromona * $valorLocal;
 
-								$numeradores[$punto['nrc']] = $numerador;
-							}
-						}
-					}
+								$estadoCruce = CursosController::verificarCruce($cursos, $semana, $punto['nrc'], $punto['nombre']);
 
-					$denominador = array_sum($numeradores);
-
-					foreach ($numeradores as $candidato => $numerador) {
-
-						if ($denominador == 0) {
-							$probabilidad = 0;
-						} else {
-							$probabilidad = $numerador / $denominador;
-						}
-
-						$probabilidades[$candidato] = $probabilidad;
-					}
-
-					$suma = 0;
-					foreach ($probabilidades as $candidato => $probabilidad) {
-						$suma += $probabilidad;
-						$acomuladas[$candidato] = $suma;
-					}
-
-					$n = (float)rand() / (float)getrandmax();
-
-					foreach ($acomuladas as $candidato => $acomulado) {
-
-						if ($n < $acomulado) {
-
-							$name = CursosController::nombreNrc($candidato);
-							$infoNrc = $cursos[$name]['nrc'][$candidato];
-							$listaDias = $infoNrc['dias'];
-							$seccion = $infoNrc['seccion'];
-
-							if (substr($seccion, -1) == "1" or substr($seccion, -1) == "2") {
-								continue;
-							} else {
-
-								$ultimo_dia = CursosController::endKey($listaDias, 2);
-								foreach ($listaDias as $dia => $infoDia) {
-
-									$horas = $infoDia['horas'];
-									$validarNrc = CursosController::validarNrc($semana, $dia, $horas, $candidato);
-									$semana = $validarNrc[1];
-
-									if ($dia == $ultimo_dia) {
-										$elegidos[] = $candidato;
+								if ($estadoCruce) {
+									if (!in_array($punto['nrc'], $descartados)) {
+										$descartados[] = $punto['nrc'];
 									}
+								} else {
+									$ultimoElegido = end($elegidos);
+									$valorFeromona = $feromonas[$ultimoElegido][$punto['nrc']];
+									$valorLocal = $locales[$ultimoElegido][$punto['nrc']];
+									$numerador = $valorFeromona * $valorLocal;
+
+									$numeradores[$punto['nrc']] = $numerador;
 								}
 							}
-
-							if (!in_array($name, $nombresX)) {
-								$nombresX[] = $name;
-							}
-
-							if (!in_array($candidato, $descartados)) {
-								$descartados[] = $candidato;
-							}
-
-							break;
 						}
+
+						$denominador = array_sum($numeradores);
+
+						foreach ($numeradores as $candidato => $numerador) {
+
+							if ($denominador == 0) {
+								$probabilidad = 0;
+							} else {
+								$probabilidad = $numerador / $denominador;
+							}
+
+							$probabilidades[$candidato] = $probabilidad;
+						}
+
+						$suma = 0;
+						foreach ($probabilidades as $candidato => $probabilidad) {
+							$suma += $probabilidad;
+							$acomuladas[$candidato] = $suma;
+						}
+
+						$n = (float)rand() / (float)getrandmax();
+
+						foreach ($acomuladas as $candidato => $acomulado) {
+
+							if ($n < $acomulado) {
+
+								$name = CursosController::nombreNrc($candidato);
+								$infoNrc = $cursos[$name]['nrc'][$candidato];
+								$listaDias = $infoNrc['dias'];
+								$seccion = $infoNrc['seccion'];
+
+								if (substr($seccion, -1) == "1" or substr($seccion, -1) == "2") {
+									continue;
+								} else {
+
+									$ultimo_dia = CursosController::endKey($listaDias, 2);
+									foreach ($listaDias as $dia => $infoDia) {
+
+										$horas = $infoDia['horas'];
+										$validarNrc = CursosController::validarNrc($semana, $dia, $horas, $candidato);
+										$semana = $validarNrc[1];
+
+										if ($dia == $ultimo_dia) {
+											$elegidos[] = $candidato;
+										}
+									}
+								}
+
+								if (!in_array($name, $nombresX)) {
+									$nombresX[] = $name;
+								}
+
+								if (!in_array($candidato, $descartados)) {
+									$descartados[] = $candidato;
+								}
+
+								break;
+							}
+						}
+					}
+
+					$feromonas = CursosController::aumentarFeromonas($elegidos, $distancias, $feromonas);
+					$feromonas = CursosController::evaporarFeromonas($feromonas);
+
+					$arrayHuecos = CursosController::contarHuecos($semana);
+					$huecosNuevos = array_sum($arrayHuecos);
+
+					if ($numero_elegidos != 1) {
+						if (count($elegidos) == $numero_elegidos) {
+							if ($huecos == 0) {
+								$huecos = $huecosNuevos;
+								$elegidos_def = $elegidos;
+								$semana_def = $semana;
+							} elseif ($huecosNuevos < $huecos) {
+								$huecos = $huecosNuevos;
+								$elegidos_def = $elegidos;
+								$semana_def = $semana;
+							}
+						}
+					} else {
+						$elegidos_def = $elegidos;
+						$semana_def = $semana;
+					}
+
+					$repeticiones -= 1;
+				}
+
+				$semana = $semana_def;
+				$elegidos = $elegidos_def;
+				// dd($huecos, $elegidos, $semana);
+
+				$end = microtime(true);
+				$time = $end - $start;
+				// dd($time, $huequillos);
+				$definitivos = [];
+				foreach ($elegidos as $elegido) {
+					$nombre = CursosController::nombreNrc($elegido);
+					$definitivos[$elegido] = $nombre;
+				}
+
+				$filas = [];
+				for ($i = 7; $i <= 20; $i++) {
+					foreach ($semana as $dia => $horas) {
+						$filas[$i][] = $semana[$dia][$i];
 					}
 				}
 
-				$feromonas = CursosController::aumentarFeromonas($elegidos, $distancias, $feromonas);
-				$feromonas = CursosController::evaporarFeromonas($feromonas);
-
-				$arrayHuecos = CursosController::contarHuecos($semana);
-				$huecosNuevos = array_sum($arrayHuecos);
-
-				if ($numero_elegidos != 1) {
-					if (count($elegidos) == $numero_elegidos) {
-						if ($huecos == 0) {
-							$huecos = $huecosNuevos;
-							$elegidos_def = $elegidos;
-							$semana_def = $semana;
-						} elseif ($huecosNuevos < $huecos) {
-							$huecos = $huecosNuevos;
-							$elegidos_def = $elegidos;
-							$semana_def = $semana;
-						}
-					}
-				} else {
-					$elegidos_def = $elegidos;
-					$semana_def = $semana;
-				}
-
-				$repeticiones -= 1;
+				$sem = [];
+				// foreach ($semanas as $semana) {
+				// 	$lista = [];
+				// 	foreach ($semana[0] as $dia => $horas) {
+				// 		foreach ($horas as $hora => $nrc) {
+				// 			if (!empty($nrc) and !in_array($nrc, $lista)) {
+				// 				$lista[] = $nrc;
+				// 			}
+				// 		}
+				// 	}
+				// 	$sem[] = [$lista, $semana[1], $semana[2]];
+				// }
+				$huecos_zx = CursosController::contarHuecos($semana);
+				$zx = array_sum($huecos_zx);
+				$soluciones[] = $zx;
+				$tiempos[] = $time;
 			}
-
-			$semana = $semana_def;
-			$elegidos = $elegidos_def;
-			// dd($huecos, $elegidos, $semana);
-
-			$end = microtime(true);
-			$time = $end - $start;
-			// dd($time, $huequillos);
-			$definitivos = [];
-			foreach ($elegidos as $elegido) {
-				$nombre = CursosController::nombreNrc($elegido);
-				$definitivos[$elegido] = $nombre;
-			}
-
-			$filas = [];
-			for ($i = 7; $i <= 20; $i++) {
-				foreach ($semana as $dia => $horas) {
-					$filas[$i][] = $semana[$dia][$i];
-				}
-			}
-
-			$sem = [];
-			// foreach ($semanas as $semana) {
-			// 	$lista = [];
-			// 	foreach ($semana[0] as $dia => $horas) {
-			// 		foreach ($horas as $hora => $nrc) {
-			// 			if (!empty($nrc) and !in_array($nrc, $lista)) {
-			// 				$lista[] = $nrc;
-			// 			}
-			// 		}
-			// 	}
-			// 	$sem[] = [$lista, $semana[1], $semana[2]];
-			// }
-			return view('resultado', ['cursos' => $cursos, 'filas' => $filas, 'definitivos' => $definitivos, 'sem' => $sem]);
+			$ensayos -= 1;
 		}
+
+		$promedio_soluciones = array_sum($soluciones) / count($soluciones);
+		$promerio_tiempos = array_sum($tiempos) / count($tiempos);
+
+		$de_soluciones = CursosController::stats_standard_deviation($soluciones);
+		$de_tiempos = CursosController::stats_standard_deviation($tiempos);
+
+		$robustez = count(array_unique($soluciones));
+		dd($soluciones, $tiempos, $promedio_soluciones, $promerio_tiempos, $de_soluciones, $de_tiempos, $robustez);
+		return view('resultado', ['cursos' => $cursos, 'filas' => $filas, 'definitivos' => $definitivos, 'sem' => $sem]);
 	}
 }
