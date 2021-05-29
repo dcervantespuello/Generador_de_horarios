@@ -5,14 +5,14 @@
 
 
 <div class="container-fluid">
-    <div class="row justify-content-center mt-3">
+    <!-- <div class="row justify-content-center mt-3">
         <div class="col-1 mr-5">
             <img src="{{ asset('img/logo.png') }}" alt="logo_horarios_utb" style="width: 150px;">
         </div>
         <div class="col-4">
             <h1 class="mt-4" style="font-size: 70px;">HORARIOS UTB</h1>
         </div>
-    </div>
+    </div> -->
     <div class="row mt-3">
         <div class="col-lg-7">
             <!-- <div class="form-group">
